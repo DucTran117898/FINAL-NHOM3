@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng Nhập - Hệ Thống Quản Lý Trường Học</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .login-container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-logo {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .login-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+        }
+
+        .login-subtitle {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .login-btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .login-btn:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .forgot-password {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .forgot-password a {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .forgot-password a:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            color: var(--danger);
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .loading {
+            display: none;
+        }
+
+        .loading.show {
+            display: inline-block;
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 20px;
+            }
+
+            .login-title {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <div class="login-logo">📚</div>
+            <h1 class="login-title">Quản Lý Trường Học</h1>
+            <p class="login-subtitle">Đăng nhập để tiếp tục</p>
+        </div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required placeholder="Nhập email của bạn">
+                <div class="error-message" id="emailError"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Mật khẩu:</label>
+                <input type="password" id="password" name="password" required placeholder="Nhập mật khẩu của bạn">
+                <div class="error-message" id="passwordError"></div>
+            </div>
+
+            <button type="submit" class="login-btn" id="loginBtn">
+                <span id="btnText">Đăng Nhập</span>
+                <span class="spinner loading" id="btnSpinner"></span>
+            </button>
+
+            <div class="error-message" id="loginError" style="text-align: center; margin-top: 15px;"></div>
+        </form>
+
+        <div class="forgot-password">
+            <a href="/reset-password.html">Quên mật khẩu?</a>
+        </div>
+    </div>
+
+    <script src="assets/js/services/api.js"></script>
+    <script src="assets/js/utils/helpers.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // If already logged in, redirect to home
+            const token = localStorage.getItem('authToken');
+            if (token) {
+                window.location.href = '/index.html';
+            }
+
+            const loginForm = document.getElementById('loginForm');
+            const loginBtn = document.getElementById('loginBtn');
+            const btnText = document.getElementById('btnText');
+            const btnSpinner = document.getElementById('btnSpinner');
+
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                // Clear previous errors
+                document.getElementById('emailError').textContent = '';
+                document.getElementById('passwordError').textContent = '';
+                document.getElementById('loginError').textContent = '';
+
+                const email = document.getElementById('email').value.trim();
+                const password = document.getElementById('password').value;
+
+                // Validation
+                if (!email) {
+                    document.getElementById('emailError').textContent = 'Email là bắt buộc';
+                    return;
+                }
+
+                if (!ValidationUtils.isEmail(email)) {
+                    document.getElementById('emailError').textContent = 'Email không hợp lệ';
+                    return;
+                }
+
+                if (!password) {
+                    document.getElementById('passwordError').textContent = 'Mật khẩu là bắt buộc';
+                    return;
+                }
+
+                try {
+                    loginBtn.disabled = true;
+                    btnText.textContent = 'Đang đăng nhập...';
+                    btnSpinner.classList.add('show');
+
+                    const response = await authService.login(email, password);
+
+                    if (response && response.token) {
+                        apiClient.setToken(response.token);
+                        StorageUtils.set('user', response.user);
+
+                        // Redirect to home page
+                        setTimeout(() => {
+                            window.location.href = '/index.html';
+                        }, 500);
+                    } else {
+                        document.getElementById('loginError').textContent = 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.';
+                    }
+                } catch (error) {
+                    console.error('Login error:', error);
+                    document.getElementById('loginError').textContent = error.message || 'Đăng nhập thất bại. Vui lòng thử lại sau.';
+                } finally {
+                    loginBtn.disabled = false;
+                    btnText.textContent = 'Đăng Nhập';
+                    btnSpinner.classList.remove('show');
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

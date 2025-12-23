@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Học Sinh - Hệ Thống Quản Lý Trường Học</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+
+<body>
+    <div class="layout-wrapper">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-logo">📚 Quản Lý Trường</div>
+            <ul class="sidebar-menu">
+                <li><a href="index.html" class="nav-link" data-page="dashboard">🏠 Dashboard</a></li>
+                <li><a href="subjects.html" class="nav-link" data-page="subjects">📖 Môn Học</a></li>
+                <li><a href="teachers.html" class="nav-link" data-page="teachers">👨‍🏫 Giáo Viên</a></li>
+                <li><a href="students.html" class="nav-link active" data-page="students">👨‍🎓 Học Sinh</a></li>
+                <li><a href="classrooms.html" class="nav-link" data-page="classrooms">🏫 Lớp Học</a></li>
+                <li><a href="scores.html" class="nav-link" data-page="scores">📊 Điểm Số</a></li>
+            </ul>
+        </aside>
+
+        <div class="main-content">
+            <header class="header">
+                <h1 class="header-title">Quản Lý Học Sinh</h1>
+                <div class="header-right">
+                    <div class="user-menu">
+                        <span class="user-avatar" id="userAvatar">AD</span>
+                        <button class="logout-btn" id="logoutBtn">Đăng Xuất</button>
+                    </div>
+                </div>
+            </header>
+
+            <div id="alertContainer" style="position: fixed; top: 20px; right: 20px; z-index: 9999; max-width: 400px;">
+            </div>
+
+            <div class="content">
+                <div style="margin-bottom: 20px;">
+                    <button class="btn btn-primary" id="addBtn">➕ Thêm Học Sinh</button>
+                    <div class="search-bar" style="display: inline-block; margin-left: 10px;">
+                        <input type="text" id="searchInput" placeholder="Tìm kiếm học sinh..."
+                            style="min-width: 250px;">
+                        <button class="btn btn-outline" id="searchBtn">🔍 Tìm</button>
+                    </div>
+                </div>
+
+                <div class="table-wrapper">
+                    <table id="studentsTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Tên Học Sinh</th>
+                                <th>Email</th>
+                                <th>Lớp Học</th>
+                                <th>Ngày Tạo</th>
+                                <th>Hành Động</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 40px;">Đang tải dữ liệu...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="paginationContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Add/Edit Student -->
+    <div class="modal" id="studentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Thêm Học Sinh</h2>
+                <span class="modal-close" id="modalClose">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="studentForm">
+                    <div class="form-group">
+                        <label for="name">Tên Học Sinh:</label>
+                        <input type="text" id="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email:</label>
+                        <input type="email" id="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="classroomId">Lớp Học:</label>
+                        <select id="classroomId" required>
+                            <option value="">-- Chọn Lớp Học --</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" id="cancelBtn">Hủy</button>
+                <button type="button" class="btn btn-primary" id="saveBtn">Lưu</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/services/api.js"></script>
+    <script src="assets/js/utils/helpers.js"></script>
+    <script src="assets/js/app.js"></script>
+    <script src="assets/js/pages/students.js"></script>
+</body>
+
+</html>
