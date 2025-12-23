@@ -1,6 +1,7 @@
 final-api/
 ├── index.php                          # Entry point, redirects to login
 ├── database_schema.sql                # PostgreSQL database schema
+├── folder_structure.txt                # Describes structure (like requested CSV)
 ├── app/
 │   ├── common/
 │   │   ├── db.php                     # Database connection singleton
@@ -9,7 +10,6 @@ final-api/
 │   │   └── common.php                 # Authentication middleware
 │   └── modules/
 │       ├── auth/                      # MODULE: Authentication & System
-│       │   ├── controllers/           # (Future: login, reset controllers)
 │       │   ├── models/
 │       │   │   └── admin.php          # Admin model (login, reset)
 │       │   └── views/
@@ -18,7 +18,6 @@ final-api/
 │       │       ├── reset-password.php # No2: Request reset
 │       │       └── admin-reset.php    # No2: Reset list
 │       ├── subjects/                  # MODULE: Subjects Management
-│       │   ├── controllers/           # (Future: subject controllers)
 │       │   ├── models/
 │       │   │   └── subject.php        # Subject model (CRUD)
 │       │   └── views/
@@ -26,7 +25,6 @@ final-api/
 │       │       ├── subject_add.php    # No4: Add subject
 │       │       └── subject_edit.php   # No5: Edit subject (to be created)
 │       ├── teachers/                  # MODULE: Teachers Management
-│       │   ├── controllers/           # (Future: teacher controllers)
 │       │   ├── models/
 │       │   │   └── teacher.php        # Teacher model (CRUD)
 │       │   └── views/
@@ -34,7 +32,6 @@ final-api/
 │       │       ├── teacher_add.php    # No7: Add teacher
 │       │       └── teacher_edit.php   # No8: Edit teacher (to be created)
 │       ├── students/                  # MODULE: Students Management
-│       │   ├── controllers/           # (Future: student controllers)
 │       │   ├── models/
 │       │   │   └── student.php        # Student model (CRUD)
 │       │   └── views/
@@ -42,7 +39,6 @@ final-api/
 │       │       ├── student_add.php    # No10: Add student
 │       │       └── student_edit.php   # No11: Edit student (to be created)
 │       └── scores/                    # MODULE: Scores Management
-│           ├── controllers/           # (Future: score controllers)
 │           ├── models/
 │           │   └── score.php          # Score model (CRUD with joins)
 │           └── views/
