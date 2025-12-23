@@ -1,5 +1,5 @@
 <?php
-require_once '../common/db.php';
+require_once __DIR__ . '/../../../common/db.php';
 
 class Admin {
     private $db;
@@ -41,4 +41,3 @@ class Admin {
         return $stmt->fetch();
     }
 }
-?>

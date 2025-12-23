@@ -1,62 +1,63 @@
--- Database schema for PostgreSQL
+-- Database schema for MySQL
 
--- Create admins table
+-- Table: admins
 CREATE TABLE admins (
-    id SERIAL PRIMARY KEY,
-    login_id VARCHAR(20) UNIQUE NOT NULL,
-    password VARCHAR(64) NOT NULL,
-    actived_flag INTEGER DEFAULT 1,
+    id INT(10) AUTO_INCREMENT PRIMARY KEY,
+    login_id VARCHAR(20) UNIQUE,
+    password VARCHAR(64),
+    actived_flag INT(1) DEFAULT 1 COMMENT '0: not active, 1: actived',
     reset_password_token VARCHAR(100),
-    updated TIMESTAMP,
-    created TIMESTAMP
+    updated DATETIME,
+    created DATETIME
 );
 
--- Create subjects table
+-- Table: subjects
 CREATE TABLE subjects (
-    id SERIAL PRIMARY KEY,
+    id INT(10) AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(250),
-    avatar VARCHAR(250),
+    avatar VARCHAR(250) COMMENT 'name of avatar file (don’t store path of file in DB)',
     description TEXT,
-    school_year CHAR(10),
-    updated TIMESTAMP,
-    created TIMESTAMP
+    school_year CHAR(10) COMMENT 'code of school_year',
+    updated DATETIME,
+    created DATETIME
 );
 
--- Create teachers table
+-- Table: teachers
 CREATE TABLE teachers (
-    id SERIAL PRIMARY KEY,
+    id INT(10) AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(250),
-    avatar VARCHAR(250),
+    avatar VARCHAR(250) COMMENT 'name of avatar file (don’t store path of file in DB)',
     description TEXT,
-    specialized CHAR(10),
-    degree CHAR(10),
-    updated TIMESTAMP,
-    created TIMESTAMP
+    specialized CHAR(10) COMMENT 'code of specialized (chuyên ngành)',
+    degree CHAR(10) COMMENT 'code of degree (bằng cấp)',
+    updated DATETIME,
+    created DATETIME
 );
 
--- Create students table
+-- Table: students
 CREATE TABLE students (
-    id SERIAL PRIMARY KEY,
+    id INT(10) AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(250),
-    avatar VARCHAR(250),
+    avatar VARCHAR(250) COMMENT 'name of avatar file (don’t store path of file in DB)',
     description TEXT,
-    updated TIMESTAMP,
-    created TIMESTAMP
+    updated DATETIME,
+    created DATETIME
 );
 
--- Create scores table
+-- Table: scores
 CREATE TABLE scores (
-    id SERIAL PRIMARY KEY,
-    student_id INTEGER,
-    teacher_id INTEGER,
-    subject_id INTEGER,
-    score INTEGER DEFAULT 0,
+    id INT(10) AUTO_INCREMENT PRIMARY KEY,
+    student_id INT(10),
+    teacher_id INT(10),
+    subject_id INT(10),
+    score INT(2) DEFAULT 0,
     description TEXT,
-    updated TIMESTAMP,
-    created TIMESTAMP
+    updated DATETIME,
+    created DATETIME,
+    FOREIGN KEY (student_id) REFERENCES students(id),
+    FOREIGN KEY (teacher_id) REFERENCES teachers(id),
+    FOREIGN KEY (subject_id) REFERENCES subjects(id)
 );
 
--- Add foreign key constraints for scores table
-ALTER TABLE scores ADD CONSTRAINT fk_scores_student FOREIGN KEY (student_id) REFERENCES students(id);
-ALTER TABLE scores ADD CONSTRAINT fk_scores_teacher FOREIGN KEY (teacher_id) REFERENCES teachers(id);
-ALTER TABLE scores ADD CONSTRAINT fk_scores_subject FOREIGN KEY (subject_id) REFERENCES subjects(id);
+-- Default Admin User (Password: 123456)
+INSERT INTO admins (login_id, password, actived_flag, created) VALUES ('admin', MD5('123456'), 1, NOW());
