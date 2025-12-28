@@ -46,7 +46,7 @@ class APIClient {
 
             if (response.status === 401) {
                 this.setToken(null);
-                window.location.href = '/login.html';
+                window.location.href = 'login.html';
             }
 
             if (!response.ok) {
@@ -89,10 +89,10 @@ const apiClient = new APIClient();
 
 // Auth Service
 const authService = {
-    login: (email, password) => apiClient.post('/api/auth/login', { email, password }),
+    login: (loginId, password) => apiClient.post('/api/auth/login', { login_id: loginId, password: password }),
     logout: () => apiClient.post('/api/auth/logout'),
     getCurrentUser: () => apiClient.get('/api/auth/me'),
-    resetPassword: (email) => apiClient.post('/api/auth/reset-password', { email }),
+    resetPassword: (loginId) => apiClient.post('/api/auth/reset-password', { login_id: loginId }),
     updatePassword: (token, password) => apiClient.post('/api/auth/update-password', { token, password }),
 };
 
