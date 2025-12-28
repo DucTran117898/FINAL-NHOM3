@@ -16,7 +16,7 @@ function initializeApp() {
     // Check if user is logged in
     const token = localStorage.getItem('authToken');
     if (!token && !window.location.pathname.includes('login')) {
-        window.location.href = '/login.html';
+        window.location.href = 'login.html';
     }
 }
 
@@ -48,10 +48,22 @@ async function checkAuthentication() {
     if (!token) return;
 
     try {
-        const user = await authService.getCurrentUser();
-        updateUserDisplay(user);
+        // Try to get user from localStorage first
+        let user = StorageUtils.get('user');
+        if (user) {
+            updateUserDisplay(user);
+        }
+
+        // Then try to get from API
+        const apiUser = await authService.getCurrentUser();
+        if (apiUser && apiUser.user) {
+            StorageUtils.set('user', apiUser.user);
+            updateUserDisplay(apiUser.user);
+        }
     } catch (error) {
         console.error('Failed to get current user:', error);
+        // Show default user display
+        updateUserDisplay(StorageUtils.get('user'));
     }
 }
 
@@ -60,15 +72,29 @@ async function checkAuthentication() {
  */
 function updateUserDisplay(user) {
     if (user) {
+        // Update avatar
         const userAvatar = document.getElementById('userAvatar');
-        if (userAvatar && user.name) {
-            const initials = user.name
+        if (userAvatar) {
+            const displayName = user.login_id || user.name || 'User';
+            const initials = displayName
                 .split(' ')
                 .map((n) => n[0])
                 .join('')
                 .toUpperCase()
                 .slice(0, 2);
             userAvatar.textContent = initials;
+            userAvatar.title = displayName;
+        }
+
+        // Update login info display
+        const loginIdDisplay = document.getElementById('loginIdDisplay');
+        if (loginIdDisplay && user.login_id) {
+            loginIdDisplay.textContent = user.login_id;
+        }
+
+        const loginTimeDisplay = document.getElementById('loginTimeDisplay');
+        if (loginTimeDisplay && user.login_time) {
+            loginTimeDisplay.textContent = user.login_time;
         }
     }
 }
@@ -81,12 +107,14 @@ async function handleLogout() {
         await authService.logout();
         apiClient.setToken(null);
         localStorage.removeItem('authToken');
-        window.location.href = '/login.html';
+        localStorage.removeItem('user');
+        window.location.href = 'login.html';
     } catch (error) {
         console.error('Logout error:', error);
         apiClient.setToken(null);
         localStorage.removeItem('authToken');
-        window.location.href = '/login.html';
+        localStorage.removeItem('user');
+        window.location.href = 'login.html';
     }
 }
 
@@ -96,7 +124,7 @@ async function handleLogout() {
 function requireAuth() {
     const token = apiClient.getToken();
     if (!token) {
-        window.location.href = '/login.html';
+        window.location.href = 'login.html';
         return false;
     }
     return true;
