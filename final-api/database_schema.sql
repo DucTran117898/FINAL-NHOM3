@@ -59,5 +59,5 @@ CREATE TABLE scores (
     FOREIGN KEY (subject_id) REFERENCES subjects(id)
 );
 
--- Default Admin User (Password: 123456)
+-- Default Admin User (login_id: admin, Password: 123456)
 INSERT INTO admins (login_id, password, actived_flag, created) VALUES ('admin', MD5('123456'), 1, NOW());
