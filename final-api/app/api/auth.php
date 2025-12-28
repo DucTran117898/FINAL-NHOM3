@@ -1,0 +1,158 @@
+<?php
+// This file is included by api-router.php
+
+require_once __DIR__ . '/../common/db.php';
+require_once __DIR__ . '/../modules/auth/models/admin.php';
+
+// Parse JSON request body
+$input = json_decode(file_get_contents('php://input'), true);
+
+// Get the request method and path
+$method = $_SERVER['REQUEST_METHOD'];
+$request_uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+
+// Extract the action from the URL
+// /api/auth/login -> login
+$parts = explode('/', trim($request_uri, '/'));
+$action = array_pop($parts); // Get last part
+
+// Log for debugging
+error_log("Method: $method, Action: $action, URI: $request_uri");
+
+try {
+    // Handle login request
+    if ($action === 'login' && $method === 'POST') {
+        handleLogin($input);
+    }
+    // Handle logout request
+    elseif ($action === 'logout' && $method === 'POST') {
+        handleLogout();
+    }
+    // Handle get current user
+    elseif ($action === 'me' && $method === 'GET') {
+        handleGetCurrentUser();
+    }
+    else {
+        http_response_code(404);
+        echo json_encode([
+            'success' => false,
+            'message' => "Endpoint not found: $action"
+        ]);
+    }
+} catch (Exception $e) {
+    http_response_code(500);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Server error: ' . $e->getMessage()
+    ]);
+}
+
+/**
+ * Handle login request
+ */
+function handleLogin($input) {
+    $errors = [];
+    
+    // Validate login_id
+    $login_id = isset($input['login_id']) ? trim($input['login_id']) : '';
+    if (empty($login_id)) {
+        $errors['login_id'] = 'Hãy nhập login id';
+    } elseif (strlen($login_id) < 4) {
+        $errors['login_id'] = 'Hãy nhập login id tối thiểu 4 ký tự';
+    }
+    
+    // Validate password
+    $password = isset($input['password']) ? trim($input['password']) : '';
+    if (empty($password)) {
+        $errors['password'] = 'Hãy nhập password';
+    } elseif (strlen($password) < 6) {
+        $errors['password'] = 'Hãy nhập password tối thiểu 6 ký tự';
+    }
+    
+    // If validation errors exist, return them
+    if (!empty($errors)) {
+        http_response_code(400);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Validation error',
+            'errors' => $errors
+        ]);
+        return;
+    }
+    
+    // Check if login_id and password exist in database
+    $adminModel = new Admin();
+    $admin = $adminModel->login($login_id, $password);
+
+    if (!$admin) {
+        http_response_code(401);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Login error',
+            'errors' => [
+                'login_id' => 'Login id và password không đúng'
+            ]
+        ]);
+        return;
+    }
+
+    // Generate a simple token
+    $token = bin2hex(random_bytes(32));
+    
+    // Get current datetime in Y-m-d H:i format
+    $loginTime = date('Y-m-d H:i');
+
+    // Return success response
+    http_response_code(200);
+    echo json_encode([
+        'success' => true,
+        'message' => 'Login successful',
+        'token' => $token,
+        'user' => [
+            'id' => $admin['id'],
+            'login_id' => $admin['login_id'],
+            'login_time' => $loginTime
+        ]
+    ]);
+}
+
+/**
+ * Handle logout request
+ */
+function handleLogout() {
+    http_response_code(200);
+    echo json_encode([
+        'success' => true,
+        'message' => 'Logout successful'
+    ]);
+}
+
+/**
+ * Handle get current user request
+ */
+function handleGetCurrentUser() {
+    // Check for Authorization header
+    $headers = getallheaders();
+    $token = isset($headers['Authorization']) ? str_replace('Bearer ', '', $headers['Authorization']) : null;
+
+    if (!$token) {
+        http_response_code(401);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Unauthorized'
+        ]);
+        return;
+    }
+
+    // In a real implementation, validate the token and return user info
+    // For now, return a dummy response
+    http_response_code(200);
+    echo json_encode([
+        'success' => true,
+        'user' => [
+            'id' => 1,
+            'email' => 'admin@school.com'
+        ]
+    ]);
+}
+?>
