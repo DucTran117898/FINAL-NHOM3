@@ -118,10 +118,40 @@ body {
     align-items: center;
 }
 
+.header-left {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+}
+
 .header-title {
     font-size: 24px;
     font-weight: bold;
     color: var(--text-primary);
+    margin: 0;
+}
+
+.login-info {
+    display: flex;
+    gap: 25px;
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.login-info-item {
+    display: flex;
+    gap: 8px;
+}
+
+.login-info-label {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.login-info-value {
+    color: var(--primary);
+    font-weight: 500;
 }
 
 .header-right {
