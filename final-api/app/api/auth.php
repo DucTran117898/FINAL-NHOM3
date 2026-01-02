@@ -24,6 +24,10 @@ try {
     if ($action === 'login' && $method === 'POST') {
         handleLogin($input);
     }
+    // Handle login GET (for testing)
+    elseif ($action === 'login' && $method === 'GET') {
+        echo json_encode(['message' => 'Login endpoint requires POST method with login_id and password']);
+    }
     // Handle logout request
     elseif ($action === 'logout' && $method === 'POST') {
         handleLogout();
