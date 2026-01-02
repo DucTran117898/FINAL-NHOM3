@@ -9,357 +9,229 @@ Cuoiky/
 ├── GUIDE.md                            ← Hướng dẫn phát triển
 ├── PROJECT_STRUCTURE.md                ← File này
 │
-├── final-api/                          ← BACKEND (PHP + PostgreSQL)
-│   ├── index.php
-│   ├── classroom.php
-│   ├── database_schema.sql
-│   ├── folder_structure.txt
+├── final-api/                          ← BACKEND (PHP + MySQL)
+│   ├── index.php                       ← Entry point & API routing
+│   ├── database_schema.sql             ← MySQL database schema
+│   ├── .env                            ← Environment configuration
+│   ├── .env.example                    ← Config template
 │   │
 │   ├── app/
+│   │   ├── api/                        ← RESTful API endpoints
+│   │   │   ├── auth.php                ← Authentication (login/logout/me)
+│   │   │   ├── subjects.php            ← Subjects CRUD operations
+│   │   │   ├── teachers.php            ← Teachers CRUD operations
+│   │   │   ├── students.php            ← Students CRUD operations
+│   │   │   └── scores.php              ← Scores CRUD operations
+│   │   │
 │   │   ├── common/
-│   │   │   ├── db.php                  ← Kết nối database
-│   │   │   └── define.php              ← Config & constants
+│   │   │   ├── db.php                  ← Database connection
+│   │   │   └── define.php              ← Constants & configuration
 │   │   │
 │   │   ├── controller/
-│   │   │   ├── common.php              ← Middleware
-│   │   │   ├── classroom_add.php
-│   │   │   ├── classroom_edit.php
-│   │   │   └── classroom_search.php
+│   │   │   └── common.php              ← Authentication middleware
 │   │   │
 │   │   ├── model/
-│   │   │   ├── classroom.php
-│   │   │   ├── device.php
-│   │   │   ├── teacher.php
-│   │   │   └── transaction.php
+│   │   │   └── teacher.php             ← Teacher data model
 │   │   │
 │   │   └── modules/
 │   │       ├── auth/
-│   │       │   ├── models/
-│   │       │   │   └── admin.php
-│   │       │   └── views/
-│   │       │       ├── login.php
-│   │       │       ├── home.php
-│   │       │       ├── reset-password.php
-│   │       │       └── admin-reset.php
+│   │       │   └── models/
+│   │       │       └── admin.php       ← Admin authentication model
 │   │       │
 │   │       ├── subjects/
-│   │       │   ├── models/
-│   │       │   │   └── subject.php
-│   │       │   └── views/
-│   │       │       ├── subjects.php
-│   │       │       └── subject_add.php
+│   │       │   └── models/
+│   │       │       └── subject.php     ← Subject data model
 │   │       │
 │   │       ├── teachers/
-│   │       │   ├── models/
-│   │       │   │   └── teacher.php
-│   │       │   └── views/
-│   │       │       ├── teachers.php
-│   │       │       └── teacher_add.php
+│   │       │   └── models/
+│   │       │       └── teacher.php     ← Teacher data model
 │   │       │
 │   │       ├── students/
-│   │       │   ├── models/
-│   │       │   │   └── student.php
-│   │       │   └── views/
-│   │       │       ├── students.php
-│   │       │       └── student_add.php
+│   │       │   └── models/
+│   │       │       └── student.php     ← Student data model
 │   │       │
 │   │       └── scores/
-│   │           ├── models/
-│   │           │   └── score.php
-│   │           └── views/
-│   │               ├── scores.php
-│   │               └── score_add.php
-│   │
-│   └── web/
-│       ├── css/
-│       │   └── style.css
-│       ├── js/
-│       ├── image/
-│       └── avatar/
+│   │           └── models/
+│   │               └── score.php       ← Score data model
 │
 └── final-frontend/                     ← FRONTEND (Vanilla HTML/CSS/JavaScript)
-    ├── README_VI.md
-    │
     ├── public/
     │   ├── index.html                  ← Dashboard chính (entry point)
     │   ├── login.html                  ← Trang đăng nhập
     │   ├── subjects.html               ← Quản lý môn học
     │   ├── teachers.html               ← Quản lý giáo viên
     │   ├── students.html               ← Quản lý học sinh
-    │   ├── classrooms.html             ← Quản lý lớp học
     │   ├── scores.html                 ← Quản lý điểm số
+    │   │
+    │   ├── api/docs/                   ← API Documentation (Swagger)
+    │   │   ├── index.html              ← Swagger UI interface
+    │   │   └── swagger.json            ← OpenAPI 3.0 specification
     │   │
     │   └── assets/
     │       │
     │       ├── css/
-    │       │   └── style.css            ← Styling toàn cục
-    │       │                             • Biến màu sắc
-    │       │                             • Layout & Grid
-    │       │                             • Componentscomponents (btn, form, table...)
-    │       │                             • Responsive Design
+    │       │   └── style.css           ← Styling toàn cục
+    │       │                           • Biến màu sắc
+    │       │                           • Layout & Grid
+    │       │                           • Components (btn, form, table...)
+    │       │                           • Responsive Design
     │       │
     │       ├── js/
-    │       │   │
-    │       │   ├── app.js               ← Script chính
-    │       │   │                         • Khởi tạo app
-    │       │   │                         • Navigation
-    │       │   │                         • Global event listeners
-    │       │   │                         • Check authentication
+    │       │   ├── app.js              ← Script chính
+    │       │   │                       • Navigation
+    │       │   │                       • Authentication state
+    │       │   │                       • Global utilities
     │       │   │
     │       │   ├── services/
-    │       │   │   └── api.js           ← API Client (Fetch API)
-    │       │   │                         • APIClient class
-    │       │   │                         • authService
-    │       │   │                         • subjectService
-    │       │   │                         • teacherService
-    │       │   │                         • studentService
-    │       │   │                         • scoreService
-    │       │   │                         • classroomService
+    │       │   │   └── api.js          ← API client (Fetch API)
+    │       │   │                       • HTTP requests
+    │       │   │                       • Token management
+    │       │   │                       • Error handling
     │       │   │
     │       │   ├── utils/
-    │       │   │   └── helpers.js       ← Utility Functions
-    │       │   │                         • DOM utilities
-    │       │   │                         • String utilities
-    │       │   │                         • Array utilities
-    │       │   │                         • Number utilities
-    │       │   │                         • Date utilities
-    │       │   │                         • Validation utilities
-    │       │   │                         • Storage utilities
-    │       │   │                         • Alert utilities
-    │       │   │                         • debounce, throttle
+    │       │   │   └── helpers.js      ← Utility functions
+    │       │   │                       • DOM manipulation
+    │       │   │                       • Data formatting
+    │       │   │                       • Validation
     │       │   │
     │       │   └── pages/
-    │       │       ├── subjects.js      ← Xử lý trang Môn Học
-    │       │       ├── teachers.js      ← Xử lý trang Giáo Viên
-    │       │       ├── students.js      ← Xử lý trang Học Sinh
-    │       │       ├── classrooms.js    ← Xử lý trang Lớp Học
-    │       │       └── scores.js        ← Xử lý trang Điểm Số
+    │       │       ├── subjects.js     ← Xử lý trang Môn Học
+    │       │       ├── teachers.js     ← Xử lý trang Giáo Viên
+    │       │       ├── students.js     ← Xử lý trang Học Sinh
+    │       │       └── scores.js       ← Xử lý trang Điểm Số
     │       │
-    │       ├── images/
-    │       │   └── (Hình ảnh của dự án)
-    │       │
-    │       └── icons/
-    │           └── (Icon SVG hoặc PNG)
-```
+    │       ├── images/                 ← Static images
+    │       └── icons/                  ← Icons & favicons
 
-## 📄 Mô Tả Chi Tiết
+## 🎯 Kiến Trúc Ứng Dụng
 
-### Frontend - public/
+### Backend Architecture
+- **Entry Point**: `index.php` xử lý routing cho tất cả requests
+- **API Layer**: `app/api/` chứa các endpoint RESTful
+- **Business Logic**: `app/controller/` middleware xác thực
+- **Data Access**: `app/model/` & `app/modules/*/models/` tương tác database
+- **Configuration**: `app/common/` kết nối DB & constants
 
-#### HTML Files
+### Frontend Architecture
+- **Pages**: HTML files cho từng chức năng
+- **Scripts**: JavaScript xử lý logic & API calls
+- **Services**: `api.js` - HTTP client tập trung
+- **Utilities**: Helper functions cho DOM & validation
+- **Styling**: CSS responsive với component system
 
-| File | Mục Đích | Navigation |
-|------|---------|-----------|
-| `login.html` | Trang đăng nhập | - |
-| `index.html` | Dashboard chính | 🏠 Dashboard |
-| `subjects.html` | Quản lý môn học | 📖 Môn Học |
-| `teachers.html` | Quản lý giáo viên | 👨‍🏫 Giáo Viên |
-| `students.html` | Quản lý học sinh | 👨‍🎓 Học Sinh |
-| `classrooms.html` | Quản lý lớp học | 🏫 Lớp Học |
-| `scores.html` | Quản lý điểm số | 📊 Điểm Số |
+## 📋 Danh Sách Files Theo Chức Năng
 
-#### CSS (assets/css/style.css)
+### Backend Files
 
-**Phần 1: Reset & Base**
-- CSS reset
-- Font family, colors
-- CSS variables
+| File | Mô tả | Chức năng |
+|------|--------|-----------|
+| `index.php` | Entry point | API routing & static file serving |
+| `database_schema.sql` | Database schema | MySQL tables: admins, subjects, teachers, students, scores |
+| `.env` | Environment config | Database credentials & app settings |
 
-**Phần 2: Layout**
-- Container
-- Sidebar navigation
-- Main content area
-- Header
+#### API Endpoints
+| File | Module | Endpoints |
+|------|--------|-----------|
+| `app/api/auth.php` | Authentication | POST /login, POST /logout, GET /me |
+| `app/api/subjects.php` | Subjects | CRUD operations for subjects |
+| `app/api/teachers.php` | Teachers | CRUD operations for teachers |
+| `app/api/students.php` | Students | CRUD operations for students |
+| `app/api/scores.php` | Scores | CRUD operations for scores |
 
-**Phần 3: Components**
-- Forms (input, label, validation)
-- Buttons (primary, secondary, danger)
-- Tables (header, body, hover)
-- Modals
-- Alerts
+#### Models
+| File | Entity | Methods |
+|------|--------|---------|
+| `app/modules/auth/models/admin.php` | Admin | login(), validate() |
+| `app/modules/subjects/models/subject.php` | Subject | getAll(), create(), update(), delete() |
+| `app/modules/teachers/models/teacher.php` | Teacher | CRUD operations |
+| `app/modules/students/models/student.php` | Student | CRUD operations |
+| `app/modules/scores/models/score.php` | Score | CRUD operations |
 
-**Phần 4: Utilities**
-- Pagination
-- Cards
-- Search bar
-- Loading spinner
-- Animations
+### Frontend Files
 
-**Phần 5: Responsive**
-- Mobile (max-width: 480px)
-- Tablet (max-width: 768px)
+#### HTML Pages
+| File | Purpose | Features |
+|------|---------|----------|
+| `index.html` | Dashboard | Navigation, user info, logout |
+| `login.html` | Authentication | Login form |
+| `subjects.html` | Subject management | List, add, edit, delete subjects |
+| `teachers.html` | Teacher management | CRUD teachers |
+| `students.html` | Student management | CRUD students |
+| `scores.html` | Score management | CRUD scores |
 
-#### JavaScript (assets/js/)
+#### JavaScript Files
+| File | Responsibility | Functions |
+|------|----------------|-----------|
+| `app.js` | Main application | Navigation, auth state, routing |
+| `services/api.js` | API client | HTTP requests, token management |
+| `utils/helpers.js` | Utilities | DOM helpers, validation, formatting |
+| `pages/subjects.js` | Subject page | UI logic for subject management |
+| `pages/teachers.js` | Teacher page | UI logic for teacher management |
+| `pages/students.js` | Student page | UI logic for student management |
+| `pages/scores.js` | Score page | UI logic for score management |
 
-##### app.js
-```
-- initializeApp()           Khởi tạo ứng dụng
-- setupEventListeners()     Thiết lập event listeners
-- checkAuthentication()     Kiểm tra xác thực
-- handleLogout()            Xử lý đăng xuất
-- requireAuth()             Kiểm tra yêu cầu auth
-```
+#### API Documentation
+| File | Purpose |
+|------|---------|
+| `api/docs/index.html` | Swagger UI interface |
+| `api/docs/swagger.json` | OpenAPI 3.0 specification |
 
-##### services/api.js
-```
-- APIClient class
-  ├── constructor()
-  ├── setToken()
-  ├── getToken()
-  └── request()           GET, POST, PUT, PATCH, DELETE
+## 🔄 Data Flow
 
-- authService
-  ├── login()
-  ├── logout()
-  ├── getCurrentUser()
-  ├── resetPassword()
-  └── updatePassword()
+### User Request Flow
+1. **Frontend**: User interacts with HTML/JS
+2. **API Call**: JavaScript calls `api.js` service
+3. **HTTP Request**: Fetch API sends request to backend
+4. **Routing**: `index.php` routes to appropriate API file
+5. **Processing**: API file calls model methods
+6. **Database**: Model interacts with MySQL database
+7. **Response**: JSON response sent back to frontend
+8. **UI Update**: JavaScript updates DOM with new data
 
-- subjectService
-  ├── getAll()
-  ├── getById()
-  ├── create()
-  ├── update()
-  ├── delete()
-  └── search()
+### Authentication Flow
+1. User submits login form
+2. `api.js` sends POST /api/auth/login
+3. Backend validates credentials
+4. Returns JWT token
+5. Token stored in localStorage
+6. Subsequent requests include Bearer token
+7. Token validated by middleware
 
-- teacherService, studentService, classroomService, scoreService (tương tự)
-```
+## 📊 Database Schema
 
-##### utils/helpers.js
-```
-- DOM
-  ├── getElementById()
-  ├── querySelector()
-  ├── show(), hide()
-  ├── addClass(), removeClass()
-  ├── on(), off()
-  ├── html(), text(), val()
-  └── create()
-
-- StringUtils
-- ArrayUtils
-- NumberUtils
-- DateUtils
-- ValidationUtils
-- StorageUtils
-- SessionUtils
-- AlertUtils
-
-- Helper Functions
-  ├── showAlert()
-  ├── showLoading()
-  ├── debounce()
-  └── throttle()
-```
-
-##### pages/*.js
-
-Mỗi file xử lý một trang:
-
-```
-- loadData()               Tải dữ liệu từ API
-- renderTable()            Render bảng HTML
-- openAddModal()           Mở modal thêm
-- editData()               Chỉnh sửa dữ liệu
-- saveData()               Lưu dữ liệu
-- deleteData()             Xóa dữ liệu
-- searchData()             Tìm kiếm
-- renderPagination()       Render phân trang
-- setupEventListeners()    Thiết lập sự kiện
-- closeModal()             Đóng modal
-- showLoading()            Hiển thị loading
-```
-
-## 🔄 Luồng Dữ Liệu
-
-```
-HTML Form
-   ↓
-JavaScript Event Handler
-   ↓
-Validation (ValidationUtils)
-   ↓
-API Call (apiClient)
-   ↓
-Backend Processing
-   ↓
-Response
-   ↓
-Update UI (renderTable)
-   ↓
-Show Alert (AlertUtils)
-```
-
-## 📦 Dependencies
-
-### Frontend
-- ✅ HTML5 (built-in)
-- ✅ CSS3 (built-in)
-- ✅ JavaScript ES6+ (built-in)
-- ✅ Fetch API (built-in)
-
-**Không sử dụng:**
-- ❌ React, Vue, Angular
-- ❌ jQuery, Lodash
-- ❌ Bootstrap, Tailwind
-- ❌ npm, webpack, vite
-
-### Backend
-- PHP 7.4+
-- PostgreSQL
-
-## 🎯 Quy Ước
-
-### File Naming
-```
-- HTML: kebab-case (subjects.html)
-- JS: camelCase (api.js, helpers.js, subjects.js)
-- CSS: kebab-case (style.css)
-```
-
-### Function & Variable Naming
-```
-- Variables: camelCase (let userData = {})
-- Functions: camelCase (function loadData() {})
-- Constants: UPPER_SNAKE_CASE (const API_BASE_URL = '')
-- Classes: PascalCase (class APIClient {})
-```
-
-### Folder Structure
-```
-- assets/
-  ├── css/        (CSS files)
-  ├── js/         (JavaScript files)
-  │   ├── services/   (API calls)
-  │   ├── utils/      (Helper functions)
-  │   └── pages/      (Page-specific logic)
-  ├── images/     (Images)
-  └── icons/      (Icons)
+```sql
+-- Core Tables
+admins (id, login_id, password, actived_flag, reset_password_token, updated, created)
+subjects (id, name, avatar, description, school_year, updated, created)
+teachers (id, name, avatar, description, specialized, degree, updated, created)
+students (id, name, avatar, description, classroom_id, updated, created)
+scores (id, student_id, subject_id, score, exam_date, updated, created)
 ```
 
 ## 🚀 Deployment
 
-### Frontend
-1. Đảm bảo tất cả file HTML, CSS, JS trong thư mục `public/`
-2. Sử dụng web server (Apache, Nginx, Node.js, v.v.)
-3. Cấu hình CORS nếu cần
+### Development
+- Backend: `php -S 127.0.0.1:8000 index.php`
+- Frontend: Open `final-frontend/public/index.html` or use Live Server
 
-### Backend
-1. Cấu hình PHP trên server
-2. Cấu hình PostgreSQL database
-3. Update API_BASE_URL trong `api.js` để trỏ đến production backend
+### Production
+- Backend: Deploy to PHP server (Apache/Nginx)
+- Frontend: Static hosting or same server
+- Database: MySQL server
+- Environment: Configure `.env` for production settings
 
-## 📝 Ghi Chú Quan Trọng
+## 🛠️ Development Workflow
 
-1. **No Framework**: Dự án sử dụng Vanilla JavaScript thuần túy
-2. **Simple CSS**: Không sử dụng CSS framework, chỉ CSS thuần
-3. **Easy to Learn**: Dễ hiểu, dễ bảo trì, dễ mở rộng
-4. **No Build Process**: Không cần npm, webpack, hoặc build tools
-5. **Direct Browser**: Chạy trực tiếp trong trình duyệt
+1. **Backend Changes**: Modify API files, test with Postman/Swagger
+2. **Frontend Changes**: Update HTML/JS, test in browser
+3. **Database Changes**: Update schema, run migrations
+4. **Testing**: Manual testing, API documentation
+5. **Deployment**: Git push, server restart
 
-## 🔗 Liên Kết Liên Quan
+## 📝 Notes
 
-- [README.md](README.md) - Tài liệu chính
-- [GUIDE.md](GUIDE.md) - Hướng dẫn phát triển chi tiết
-- [Backend Documentation](final-api/folder_structure.txt)
+- **Separation of Concerns**: Backend chỉ API, Frontend chỉ UI
+- **API-First Design**: RESTful endpoints with OpenAPI spec
+- **Modular Structure**: Clear separation by functionality
+- **No Legacy Code**: Removed old MVC views, cleaned up unused files
+- **Documentation**: Comprehensive Swagger docs for API consumers

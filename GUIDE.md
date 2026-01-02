@@ -7,16 +7,21 @@
 #### Backend
 ```bash
 cd final-api
-# Cấu hình database trong app/common/define.php
-php -S localhost:8000
+# Cấu hình database trong .env (copy từ .env.example)
+php -S 127.0.0.1:8000 index.php
 ```
+
+#### API Documentation
+Sau khi khởi động frontend server (Live Server trên final-frontend/public):
+- **Swagger UI**: `http://localhost:5500/api/docs`
+- **OpenAPI JSON**: `http://localhost:5500/api/docs/swagger.json`
 
 #### Frontend
 ```bash
 cd final-frontend
-# Mở public/index.html bằng Live Server hoặc trình duyệt
-# URL: http://localhost:5500 (Live Server) hoặc file:// (local)
-# Đảm bảo backend chạy trên http://localhost:8000
+Mở public/index.html bằng Live Server hoặc trình duyệt
+URL: http://localhost:5500 (Live Server) hoặc file:// (local)
+Đảm bảo backend chạy trên http://127.0.0.1:8000
 ```
 
 ## 📁 Cấu Trúc Folder Frontend
@@ -28,8 +33,10 @@ final-frontend/public/
 ├── subjects.html           # Quản lý môn học
 ├── teachers.html           # Quản lý giáo viên
 ├── students.html           # Quản lý học sinh
-├── classrooms.html         # Quản lý lớp học
 ├── scores.html             # Quản lý điểm số
+├── api/docs/               # API Documentation (Swagger)
+│   ├── index.html          # Swagger UI
+│   └── swagger.json        # OpenAPI spec
 └── assets/
     ├── css/
     │   └── style.css       # CSS toàn cục
@@ -43,7 +50,6 @@ final-frontend/public/
     │       ├── subjects.js
     │       ├── teachers.js
     │       ├── students.js
-    │       ├── classrooms.js
     │       └── scores.js
     ├── images/
     └── icons/
@@ -70,14 +76,14 @@ await subjectService.update(id, data);
 await subjectService.delete(id);
 await subjectService.search(query);
 
-// Teacher, Student, Classroom, Score Service tương tự
+// Teacher, Student, Score Service tương tự
 ```
 
 ### API Client
 
 ```javascript
 // Trong assets/js/services/api.js
-const apiClient = new APIClient('http://localhost:8000');
+const apiClient = new APIClient('http://127.0.0.1:8000');
 
 // Thiết lập token sau khi đăng nhập
 apiClient.setToken(token);
@@ -386,12 +392,6 @@ POST   /api/students
 GET    /api/students/:id
 PUT    /api/students/:id
 DELETE /api/students/:id
-
-GET    /api/classrooms
-POST   /api/classrooms
-GET    /api/classrooms/:id
-PUT    /api/classrooms/:id
-DELETE /api/classrooms/:id
 
 GET    /api/scores
 POST   /api/scores
