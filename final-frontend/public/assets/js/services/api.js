@@ -98,50 +98,56 @@ const authService = {
 
 // Subject Service
 const subjectService = {
-    getAll: (page = 1, limit = 10) => apiClient.get(`/api/subjects?page=${page}&limit=${limit}`),
+    getAll: () => apiClient.get('/api/subjects'),
     getById: (id) => apiClient.get(`/api/subjects/${id}`),
     create: (data) => apiClient.post('/api/subjects', data),
     update: (id, data) => apiClient.put(`/api/subjects/${id}`, data),
     delete: (id) => apiClient.delete(`/api/subjects/${id}`),
-    search: (query) => apiClient.get(`/api/subjects/search?q=${encodeURIComponent(query)}`),
+    search: (query) => apiClient.get(`/api/subjects?keyword=${encodeURIComponent(query)}`),
 };
 
 // Teacher Service
 const teacherService = {
-    getAll: (page = 1, limit = 10) => apiClient.get(`/api/teachers?page=${page}&limit=${limit}`),
+    getAll: () => apiClient.get('/api/teachers'),
     getById: (id) => apiClient.get(`/api/teachers/${id}`),
     create: (data) => apiClient.post('/api/teachers', data),
     update: (id, data) => apiClient.put(`/api/teachers/${id}`, data),
     delete: (id) => apiClient.delete(`/api/teachers/${id}`),
-    search: (query) => apiClient.get(`/api/teachers/search?q=${encodeURIComponent(query)}`),
+    search: (query) => apiClient.get(`/api/teachers?keyword=${encodeURIComponent(query)}`),
 };
 
 // Student Service
 const studentService = {
-    getAll: (page = 1, limit = 10) => apiClient.get(`/api/students?page=${page}&limit=${limit}`),
+    getAll: () => apiClient.get('/api/students'),
     getById: (id) => apiClient.get(`/api/students/${id}`),
     create: (data) => apiClient.post('/api/students', data),
     update: (id, data) => apiClient.put(`/api/students/${id}`, data),
     delete: (id) => apiClient.delete(`/api/students/${id}`),
-    search: (query) => apiClient.get(`/api/students/search?q=${encodeURIComponent(query)}`),
+    search: (query) => apiClient.get(`/api/students?keyword=${encodeURIComponent(query)}`),
 };
 
 // Score Service
 const scoreService = {
-    getAll: (page = 1, limit = 10) => apiClient.get(`/api/scores?page=${page}&limit=${limit}`),
+    getAll: () => apiClient.get('/api/scores'),
     getById: (id) => apiClient.get(`/api/scores/${id}`),
     create: (data) => apiClient.post('/api/scores', data),
     update: (id, data) => apiClient.put(`/api/scores/${id}`, data),
     delete: (id) => apiClient.delete(`/api/scores/${id}`),
-    search: (query) => apiClient.get(`/api/scores/search?q=${encodeURIComponent(query)}`),
+    search: (studentName = '', subjectName = '', teacherName = '') => {
+        const params = new URLSearchParams();
+        if (studentName) params.append('student_name', studentName);
+        if (subjectName) params.append('subject_name', subjectName);
+        if (teacherName) params.append('teacher_name', teacherName);
+        return apiClient.get(`/api/scores?${params.toString()}`);
+    },
 };
 
 // Classroom Service
 const classroomService = {
-    getAll: (page = 1, limit = 10) => apiClient.get(`/api/classrooms?page=${page}&limit=${limit}`),
+    getAll: () => apiClient.get('/api/classrooms'),
     getById: (id) => apiClient.get(`/api/classrooms/${id}`),
     create: (data) => apiClient.post('/api/classrooms', data),
     update: (id, data) => apiClient.put(`/api/classrooms/${id}`, data),
     delete: (id) => apiClient.delete(`/api/classrooms/${id}`),
-    search: (query) => apiClient.get(`/api/classrooms/search?q=${encodeURIComponent(query)}`),
+    search: (query) => apiClient.get(`/api/classrooms?keyword=${encodeURIComponent(query)}`),
 };
