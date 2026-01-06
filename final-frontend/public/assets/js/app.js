@@ -92,6 +92,11 @@ function updateUserDisplay(user) {
             loginIdDisplay.textContent = user.login_id;
         }
 
+        const roleDisplay = document.getElementById('roleDisplay');
+        if (roleDisplay && user.role) {
+            roleDisplay.textContent = user.role;
+        }
+
         const loginTimeDisplay = document.getElementById('loginTimeDisplay');
         if (loginTimeDisplay && user.login_time) {
             loginTimeDisplay.textContent = user.login_time;
