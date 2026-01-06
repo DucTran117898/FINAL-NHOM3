@@ -2,7 +2,7 @@
 // This file is included by api-router.php
 
 require_once __DIR__ . '/../common/db.php';
-require_once __DIR__ . '/../modules/auth/models/admin.php';
+require_once __DIR__ . '/../modules/auth/models/user.php';
 
 // Parse JSON request body
 $input = json_decode(file_get_contents('php://input'), true);
@@ -97,10 +97,10 @@ function handleLogin($input) {
     }
     
     // Check if login_id and password exist in database
-    $adminModel = new Admin();
-    $admin = $adminModel->login($login_id, $password);
+    $userModel = new User();
+    $user = $userModel->login($login_id, $password);
 
-    if (!$admin) {
+    if (!$user) {
         http_response_code(401);
         echo json_encode([
             'success' => false,
@@ -118,6 +118,9 @@ function handleLogin($input) {
     // Get current datetime in Y-m-d H:i format
     $loginTime = date('Y-m-d H:i');
 
+    // Get user details
+    $userDetails = $userModel->getUserWithDetails($user['id']);
+
     // Return success response
     http_response_code(200);
     echo json_encode([
@@ -125,8 +128,11 @@ function handleLogin($input) {
         'message' => 'Login successful',
         'token' => $token,
         'user' => [
-            'id' => $admin['id'],
-            'login_id' => $admin['login_id'],
+            'id' => $user['id'],
+            'login_id' => $user['login_id'],
+            'role' => $user['role'],
+            'reference_id' => $user['reference_id'],
+            'details' => $userDetails['details'],
             'login_time' => $loginTime
         ]
     ]);
@@ -188,7 +194,7 @@ function handleResetRequest($input) {
         return;
     }
 
-    $model = new Admin();
+    $model = new User();
     
     // Validate Exists (Theo ảnh 1)
     if (!$model->getByLoginId($login_id)) {
@@ -210,7 +216,7 @@ function handleResetRequest($input) {
 }
 
 function handleGetPendingResets() {
-    $model = new Admin();
+    $model = new User();
     // Cần đảm bảo Model Admin đã có hàm getPendingResets
     $data = $model->getPendingResets();
     echo json_encode(['success' => true, 'data' => $data]);
@@ -224,7 +230,7 @@ function handleApproveReset($input) {
         http_response_code(400); echo json_encode(['success'=>false, 'message'=>'Mật khẩu mới phải >= 6 ký tự']); return;
     }
 
-    $model = new Admin();
+    $model = new User();
     // Cần đảm bảo Model Admin đã có hàm resetPassword
     if ($model->resetPassword($id, $new_pass)) {
         echo json_encode(['success'=>true, 'message'=>'Reset thành công']);
