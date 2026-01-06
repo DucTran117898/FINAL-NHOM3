@@ -2,7 +2,8 @@
 // This file is included by api-router.php
 
 require_once __DIR__ . '/../common/db.php';
-require_once __DIR__ . '/../modules/auth/models/user.php';
+require_once __DIR__ . '/../controller/common.php'; // Include shared auth logic
+require_once __DIR__ . '/../modules/auth/models/admin.php';
 
 // Parse JSON request body
 $input = json_decode(file_get_contents('php://input'), true);
@@ -112,15 +113,20 @@ function handleLogin($input) {
         return;
     }
 
-    // Generate a simple token
-    $token = bin2hex(random_bytes(32));
-    
     // Get current datetime in Y-m-d H:i format
     $loginTime = date('Y-m-d H:i');
 
-    // Get user details
-    $userDetails = $userModel->getUserWithDetails($user['id']);
-
+    // Generate JWT token
+    $payload = [
+        'sub' => $admin['id'],
+        'login_id' => $admin['login_id'],
+        'login_time' => $loginTime,
+        'iat' => time(),
+        'exp' => time() + SESSION_TIMEOUT // Token expiration
+    ];
+    // generateJWT is now available from common.php
+    $token = generateJWT($payload);
+    
     // Return success response
     http_response_code(200);
     echo json_encode([
@@ -166,14 +172,40 @@ function handleGetCurrentUser() {
         return;
     }
 
-    // In a real implementation, validate the token and return user info
-    // For now, return a dummy response
+    // Validate JWT using function from common.php
+    $payload = validateJWT($token);
+    if (!$payload) {
+        http_response_code(401);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Invalid or expired token'
+        ]);
+        return;
+    }
+
+    // Get user from database to ensure they still exist and are active
+    $adminModel = new Admin();
+    $admin = $adminModel->getById($payload['sub']);
+
+    if (!$admin || $admin['actived_flag'] != ACTIVE) {
+        http_response_code(401);
+        echo json_encode([
+            'success' => false,
+            'message' => 'User not found or inactive'
+        ]);
+        return;
+    }
+
+    // Use login_time from token if available, otherwise current time
+    $loginTime = isset($payload['login_time']) ? $payload['login_time'] : date('Y-m-d H:i');
+
     http_response_code(200);
     echo json_encode([
         'success' => true,
         'user' => [
-            'id' => 1,
-            'email' => 'admin@school.com'
+            'id' => $admin['id'],
+            'login_id' => $admin['login_id'],
+            'login_time' => $loginTime
         ]
     ]);
 }
