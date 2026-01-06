@@ -187,27 +187,45 @@
 
             // Handle input changes - clear specific field error when user starts typing
             loginIdInput.addEventListener('input', () => {
-                if (document.getElementById('loginIdError').textContent) {
-                    document.getElementById('loginIdError').textContent = '';
-                    loginIdInput.classList.remove('error');
-                }
+                clearError('loginId');
             });
 
             passwordInput.addEventListener('input', () => {
-                if (document.getElementById('passwordError').textContent) {
-                    document.getElementById('passwordError').textContent = '';
-                    passwordInput.classList.remove('error');
-                }
+                clearError('password');
             });
 
             loginForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
 
                 // Clear previous errors
-                clearErrors();
+                clearAllErrors();
 
                 const loginId = loginIdInput.value.trim();
                 const password = passwordInput.value;
+                let hasError = false;
+
+                // Validate Login ID
+                if (!loginId) {
+                    showError('loginId', 'Hãy nhập login id');
+                    hasError = true;
+                } else if (loginId.length < 4) {
+                    showError('loginId', 'Hãy nhập login id tối thiểu 4 ký tự');
+                    hasError = true;
+                }
+
+                // Validate Password
+                if (!password) {
+                    showError('password', 'Hãy nhập password');
+                    hasError = true;
+                } else if (password.length < 6) {
+                    // Corrected typo from user request: "login id" -> "password"
+                    showError('password', 'Hãy nhập password tối thiểu 6 ký tự');
+                    hasError = true;
+                }
+
+                if (hasError) {
+                    return;
+                }
 
                 try {
                     loginBtn.disabled = true;
@@ -230,9 +248,10 @@
                     } else {
                         // Handle server errors
                         if (response && response.errors) {
-                            displayErrors(response.errors);
+                            displayServerErrors(response.errors);
                         } else {
-                            showError('loginId', 'Đăng nhập thất bại. Vui lòng thử lại.');
+                            // "login id và password không đúng" is shown for generic failures or specific backend check
+                            showError('loginId', 'Login id và password không đúng');
                         }
                     }
                 } catch (error) {
@@ -245,11 +264,16 @@
                 }
             });
 
-            function clearErrors() {
-                document.getElementById('loginIdError').textContent = '';
-                document.getElementById('passwordError').textContent = '';
-                loginIdInput.classList.remove('error');
-                passwordInput.classList.remove('error');
+            function clearError(fieldId) {
+                const errorElement = document.getElementById(fieldId + 'Error');
+                const inputElement = document.getElementById(fieldId);
+                if (errorElement) errorElement.textContent = '';
+                if (inputElement) inputElement.classList.remove('error');
+            }
+
+            function clearAllErrors() {
+                clearError('loginId');
+                clearError('password');
             }
 
             function showError(fieldId, message) {
@@ -257,14 +281,22 @@
                 const inputElement = document.getElementById(fieldId);
                 if (errorElement) {
                     errorElement.textContent = message;
+                }
+                if (inputElement) {
                     inputElement.classList.add('error');
                 }
             }
 
-            function displayErrors(errors) {
+            function displayServerErrors(errors) {
+                // Determine if we should show the generic "wrong login/pass" message
+                // The backend currently returns specific field errors or a generic one.
+                // Based on requirements, if "exists" fails (which implies wrong creds), show "Login id và password không đúng"
+
+                // If the backend returns 'login_id' error specifically saying it doesn't exist or doesn't match
                 if (errors.login_id) {
                     showError('loginId', errors.login_id);
                 }
+
                 if (errors.password) {
                     showError('password', errors.password);
                 }
