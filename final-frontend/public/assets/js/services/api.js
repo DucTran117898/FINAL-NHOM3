@@ -89,11 +89,17 @@ const apiClient = new APIClient();
 
 // Auth Service
 const authService = {
+    // GIỮ NGUYÊN CÁC DÒNG CŨ ĐANG CHẠY ĐƯỢC
     login: (loginId, password) => apiClient.post('/api/auth/login', { login_id: loginId, password: password }),
     logout: () => apiClient.post('/api/auth/logout'),
     getCurrentUser: () => apiClient.get('/api/auth/me'),
-    resetPassword: (loginId) => apiClient.post('/api/auth/reset-password', { login_id: loginId }),
-    updatePassword: (token, password) => apiClient.post('/api/auth/update-password', { token, password }),
+
+    // --- THÊM 3 DÒNG NÀY (Dùng đúng chuẩn /api/auth/...) ---
+    requestReset: (loginId) => apiClient.post('/api/auth/reset-request', { login_id: loginId }),
+    
+    getPendingResets: () => apiClient.get('/api/auth/reset-list'),
+    
+    approveReset: (id, newPassword) => apiClient.post('/api/auth/reset-approve', { id: id, new_password: newPassword })
 };
 
 // Subject Service

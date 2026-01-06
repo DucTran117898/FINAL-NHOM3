@@ -36,6 +36,18 @@ try {
     elseif ($action === 'me' && $method === 'GET') {
         handleGetCurrentUser();
     }
+    // 4. Gửi yêu cầu Reset (User)
+    elseif ($action === 'reset-request' && $method === 'POST') {
+        handleResetRequest($input);
+    }
+    // 5. Lấy danh sách chờ (Admin)
+    elseif ($action === 'reset-list' && $method === 'GET') {
+        handleGetPendingResets();
+    }
+    // 6. Duyệt Reset (Admin)
+    elseif ($action === 'reset-approve' && $method === 'POST') {
+        handleApproveReset($input);
+    }
     else {
         http_response_code(404);
         echo json_encode([
@@ -158,5 +170,66 @@ function handleGetCurrentUser() {
             'email' => 'admin@school.com'
         ]
     ]);
+}
+function handleResetRequest($input) {
+    $login_id = isset($input['login_id']) ? trim($input['login_id']) : '';
+
+    // Validate Required
+    if (empty($login_id)) {
+        http_response_code(400); 
+        echo json_encode(['success'=>false, 'message'=>'Hãy nhập login id']); 
+        return;
+    }
+
+    // Validate Minlength: 4 (Theo ảnh 1)
+    if (strlen($login_id) < 4) {
+        http_response_code(400); 
+        echo json_encode(['success'=>false, 'message'=>'Hãy nhập login id tối thiểu 4 ký tự']); 
+        return;
+    }
+
+    $model = new Admin();
+    
+    // Validate Exists (Theo ảnh 1)
+    if (!$model->getByLoginId($login_id)) {
+        http_response_code(400); 
+        // SỬA CÂU NÀY CHO KHỚP 100% ẢNH YÊU CẦU
+        echo json_encode(['success'=>false, 'message'=>'login id không tồn tại trong hệ thống']); 
+        return;
+    }
+
+    // Update Token = microtime (Theo ảnh 2)
+    $token = (string)microtime(true);
+    
+    if ($model->updateResetToken($login_id, $token)) {
+        echo json_encode(['success'=>true, 'message'=>'Gửi yêu cầu thành công']);
+    } else {
+        http_response_code(500); 
+        echo json_encode(['success'=>false, 'message'=>'Lỗi Database']);
+    }
+}
+
+function handleGetPendingResets() {
+    $model = new Admin();
+    // Cần đảm bảo Model Admin đã có hàm getPendingResets
+    $data = $model->getPendingResets();
+    echo json_encode(['success' => true, 'data' => $data]);
+}
+
+function handleApproveReset($input) {
+    $id = $input['id'] ?? '';
+    $new_pass = isset($input['new_password']) ? trim($input['new_password']) : '';
+
+    if (empty($new_pass) || strlen($new_pass) < 6) {
+        http_response_code(400); echo json_encode(['success'=>false, 'message'=>'Mật khẩu mới phải >= 6 ký tự']); return;
+    }
+
+    $model = new Admin();
+    // Cần đảm bảo Model Admin đã có hàm resetPassword
+    if ($model->resetPassword($id, $new_pass)) {
+        echo json_encode(['success'=>true, 'message'=>'Reset thành công']);
+    } else {
+        http_response_code(500); echo json_encode(['success'=>false, 'message'=>'Lỗi cập nhật']);
+    }
 }
 ?>
