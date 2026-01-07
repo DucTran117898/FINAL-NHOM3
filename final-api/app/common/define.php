@@ -45,3 +45,6 @@ define('RECAPTCHA_SECRET_KEY', getenv('RECAPTCHA_SECRET_KEY') ?: '6LeIxAcTAAAAAG
 
 // Timezone (from .env file)
 date_default_timezone_set(getenv('TIMEZONE') ?: 'Asia/Ho_Chi_Minh');
+
+// JWT Secret
+define('JWT_SECRET', getenv('JWT_SECRET') ?: 'your-secret-key-change-in-production');

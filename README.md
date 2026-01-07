@@ -3,15 +3,17 @@
 ## Tổng Quan
 Đây là một dự án hoàn chỉnh để quản lý trường học với kiến trúc **API-first**. Hệ thống bao gồm:
 
-- **Backend (API)**: PHP thuần, RESTful API
+- **Backend (API)**: PHP thuần, RESTful API với JWT authentication
 - **Frontend**: Vanilla HTML/CSS/JavaScript
-- **Database**: MySQL
+- **Database**: MySQL với role-based user system
 - **Documentation**: Swagger UI
 
 ## 🚀 Tính Năng Chính
 
 ### Backend API
-- ✅ **Authentication**: Login/Logout với JWT token
+- ✅ **Authentication**: Login/Logout với JWT token và role-based access
+- ✅ **User Roles**: Hỗ trợ admin, teacher, student roles
+- ✅ **Password Reset**: Hoàn thiện chức năng reset password
 - ✅ **Subjects Management**: CRUD môn học
 - ✅ **Teachers Management**: CRUD giáo viên
 - ✅ **Students Management**: CRUD học sinh
@@ -19,12 +21,66 @@
 - ✅ **API Documentation**: Swagger UI
 
 ### Frontend
-- ✅ **Dashboard**: Tổng quan hệ thống
+- ✅ **Dashboard**: Tổng quan hệ thống với role display
 - ✅ **Subjects Page**: Quản lý môn học
 - ✅ **Teachers Page**: Quản lý giáo viên
 - ✅ **Students Page**: Quản lý học sinh
 - ✅ **Scores Page**: Quản lý điểm số
 - ✅ **Responsive Design**: Hoạt động trên mọi thiết bị
+
+## 🔑 Key Changes
+
+### Session Persistence & JWT Integration
+- Implemented JWT on the backend to handle user authentication
+- Ensured user sessions persist across page refreshes and navigation by storing and verifying tokens
+
+### Enhanced Input Validation
+- Added comprehensive client-side validation in login.html
+- Users now receive specific error feedback for empty fields or inputs that do not meet length requirements
+
+### API Security (Action Specification)
+- Secured all core API endpoints (subjects, teachers, students, scores)
+- Integrated checkAuth() middleware to verify authorization before processing requests
+
+### Database-Driven Authentication
+- Removed hardcoded/dummy API responses
+- Implemented real database queries to authenticate credentials and retrieve user profiles
+
+### Navigation & UI
+- Updated the Sidebar navigation logic to reflect the user's authentication state dynamically
+
+## 📋 Technical Notes
+
+### Backend
+- Updated auth.php to issue and verify tokens
+- Implemented User model with role support
+- Added middleware protection for API endpoints
+
+### Frontend
+- Updated app.js to manage token storage (LocalStorage) and attach them to outgoing requests
+- Enhanced login form with validation and error handling
+
+### Schema
+- Updated database_schema.sql to support user roles and credential fields
+- Added sample users with different roles (admin, teacher, student)
+
+## 🧪 How to Verify
+
+### Authentication Testing
+- Attempt to access /subjects or /students without logging in (should be blocked)
+- Log in with valid credentials; verify that the sidebar updates and the session remains active after a refresh
+- Test the login form with empty or short inputs to trigger the new validation messages
+
+### Role-Based Access
+- Test with different user roles:
+  - **admin**: `admin` / `123456`
+  - **teacher**: `teacher1` / `123456`
+  - **student**: `student1` / `123456`
+- Verify role display in dashboard header
+
+### Password Reset
+- Test reset password functionality with valid login_id
+- Verify admin approval workflow for password resets
 
 ## 📁 Cấu Trúc Dự Án
 
@@ -101,8 +157,13 @@ mysql -u root -p
 CREATE DATABASE school_management;
 exit
 
-# Import schema
+# Import schema với user roles và sample data
 mysql -u root -p school_management < final-api/database_schema.sql
+
+# Schema bao gồm:
+# - users table với role-based authentication (admin, teacher, student)
+# - Sample accounts cho testing
+# - Teachers, students, subjects, scores tables
 ```
 
 ### 3. Cấu Hình Backend
@@ -131,10 +192,23 @@ Sau khi khởi động backend:
 
 ### Authentication
 ```
-POST /api/auth/login     # Đăng nhập
-POST /api/auth/logout    # Đăng xuất
-GET  /api/auth/me        # Thông tin user hiện tại
+POST /api/auth/login         # Đăng nhập với JWT token
+POST /api/auth/logout        # Đăng xuất
+GET  /api/auth/me            # Thông tin user hiện tại với role
+POST /api/auth/reset-request # Yêu cầu reset password
+GET  /api/auth/reset-list    # Admin xem danh sách reset requests
+POST /api/auth/reset-approve # Admin duyệt reset password
 ```
+
+### User Roles
+- **admin**: Full system access, manage users, approve password resets
+- **teacher**: Access to scores and student management
+- **student**: View personal scores and information
+
+### Sample Accounts
+- **Admin**: `admin` / `123456`
+- **Teacher**: `teacher1` / `123456` (Nguyen Van A)
+- **Student**: `student1` / `123456` (Le Van C)
 
 ### Subjects
 ```
@@ -333,7 +407,11 @@ live-server
 
 ### 5. Đăng Nhập Lần Đầu
 - Truy cập: `http://127.0.0.1:5500/login.html`
-- Đăng nhập với tài khoản admin (xem database_schema.sql để lấy thông tin)
+- **Sample Accounts:**
+  - **Admin**: `admin` / `123456` (full access)
+  - **Teacher**: `teacher1` / `123456` (scores & students)
+  - **Student**: `student1` / `123456` (personal scores)
+- Test role-based access và JWT session persistence
 
 ## Công Nghệ Sử Dụng
 
@@ -353,22 +431,29 @@ live-server
 ## Các Phần Đã Xây Dựng
 
 ### Backend API (`final-api/app/api/`)
-- **auth.php** - API xác thực (Login/Logout/Reset Password)
-  - POST `/api/auth/login` - Đăng nhập
+- **auth.php** - API xác thực hoàn chỉnh với JWT & role-based access
+  - POST `/api/auth/login` - Đăng nhập với JWT token
   - POST `/api/auth/logout` - Đăng xuất
-  - POST `/api/auth/reset-password` - Reset mật khẩu
+  - GET `/api/auth/me` - Thông tin user với role
+  - POST `/api/auth/reset-request` - Yêu cầu reset password
+  - GET `/api/auth/reset-list` - Admin xem reset requests
+  - POST `/api/auth/reset-approve` - Admin duyệt reset
+- **User Model** - Hỗ trợ role-based authentication (admin/teacher/student)
 
 ### Frontend Pages
-- **login.html** - Trang đăng nhập với xác thực reCAPTCHA
-- **index.html** - Dashboard chính (protected by authentication)
-- **assets/js/app.js** - Quản lý routing và session
-- **assets/js/services/api.js** - Service giao tiếp với backend API
+- **login.html** - Trang đăng nhập với validation & error handling
+- **index.html** - Dashboard với role display & protected navigation
+- **assets/js/app.js** - JWT session management & role-based UI
+- **assets/js/services/api.js** - API client với token authentication
 
 ### Database
-- **database_schema.sql** - Schema hoàn chỉnh cho tất cả các bảng
+- **database_schema.sql** - Schema với users table, roles & sample data
+- **Role-based system** - Admin, teacher, student roles với permissions
 
-### Router
-- **api-router.php** - Xử lý routing API request
+### Security & Middleware
+- **JWT Authentication** - Secure token-based sessions
+- **API Protection** - Middleware bảo vệ tất cả endpoints
+- **Input Validation** - Client & server-side validation
 
 ## Tính Năng Chính (Sắp Hoàn Thành)
 
@@ -408,11 +493,14 @@ live-server
 - Tìm kiếm điểm số
 
 ### 6. Xác Thực ✅ (Đã Hoàn Thành)
-- ✅ Đăng nhập với email và mật khẩu
-- ✅ Xác thực bằng reCAPTCHA
-- ✅ Đăng xuất
-- ✅ Quản lý session
-- ✅ Reset mật khẩu
+- ✅ **JWT Authentication**: Secure token-based sessions
+- ✅ **Role-Based Access**: Admin, teacher, student roles
+- ✅ **Database-Driven**: Real authentication vs dummy responses
+- ✅ **Session Persistence**: Sessions survive page refreshes
+- ✅ **API Protection**: Middleware bảo vệ tất cả endpoints
+- ✅ **Password Reset**: Complete reset workflow với admin approval
+- ✅ **Input Validation**: Client-side validation với error feedback
+- ✅ **UI State Management**: Dynamic navigation based on auth state
 
 ## Quy Ước Code
 
