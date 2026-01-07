@@ -20,6 +20,20 @@
                 <li><a href="students.html" class="nav-link" data-page="students">👨‍🎓 Học Sinh</a></li>
                 <li><a href="scores.html" class="nav-link" data-page="scores">📊 Điểm Số</a></li>
                 <li><a href="api/docs/" class="nav-link" target="_blank">📖 API Docs</a></li>
+                <li>
+    <a href="admin-reset.html" class="nav-link" style="display: flex; align-items: center; justify-content: space-between;">
+        <span>🔐 Duyệt Reset</span>
+        <span id="reset-badge" style="
+            display: none;
+            background-color: #ff4757;
+            color: white;
+            border-radius: 12px;
+            padding: 2px 8px;
+            font-size: 11px;
+            font-weight: bold;
+        ">0</span>
+    </a>
+</li>
             </ul>
         </aside>
 
@@ -64,6 +78,25 @@
     <script src="assets/js/services/api.js"></script>
     <script src="assets/js/utils/helpers.js"></script>
     <script src="assets/js/app.js"></script>
+    <script>
+        async function checkPendingResets() {
+            try {
+                const res = await authService.getPendingResets();
+                const badge = document.getElementById('reset-badge');
+
+                if (res.success && res.data && res.data.length > 0) {
+                    badge.innerText = res.data.length;
+                    badge.style.display = 'inline-block';
+                } else {
+                    badge.style.display = 'none';
+                }
+            } catch (error) {
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', checkPendingResets);
+        setInterval(checkPendingResets, 5000);
+    </script>
 </body>
 
 </html>

@@ -24,8 +24,6 @@
     <div class="container">
         <a href="index.html" class="home-link">← Về trang chủ</a>
         <h2>Danh sách yêu cầu Reset Password</h2>
-        
-        HTML
 
 <table>
     <thead>
@@ -42,60 +40,96 @@
     </div>
 
     <script src="assets/js/services/api.js"></script>
-    <script>
-        async function loadData() {
+<script>
+    // Biến lưu trữ dữ liệu cũ để so sánh
+    let previousDataString = '';
+
+    // Hàm load danh sách
+    async function loadData() {
         try {
+            // Gọi API lấy danh sách (Chạy ngầm)
             const res = await authService.getPendingResets();
             const tbody = document.getElementById('tableBody');
-            tbody.innerHTML = '';
 
-            if (res.success && res.data && res.data.length > 0) {
-                // Thêm index để đếm số thứ tự (NO)
-                res.data.forEach((user, index) => {
-                    tbody.innerHTML += `
-                        <tr>
-                            <td>${index + 1}</td> <td><strong>${user.login_id}</strong></td>
-                            <td>
-                                <input type="text" id="pass_${user.id}" placeholder="">
-                            </td>
-                            <td>
-                                <button onclick="approve(${user.id})">Reset</button>
-                            </td>
-                        </tr>
-                    `;
-                });
-            } else {
-                tbody.innerHTML = '<tr><td colspan="4" style="color:#777">Không có yêu cầu nào.</td></tr>';
+            if (res.success) {
+                const data = res.data || [];
+
+                // --- LOGIC THÔNG MINH ---
+                // Chuyển dữ liệu mới thành chuỗi để so sánh với dữ liệu cũ
+                const currentDataString = JSON.stringify(data);
+
+                // Nếu dữ liệu Y HỆT lần trước -> DỪNG LẠI NGAY (Không vẽ lại bảng)
+                // Giúp Admin đang gõ mật khẩu không bị mất chữ
+                if (currentDataString === previousDataString) {
+                    return; 
+                }
+
+                // Nếu có sự khác biệt (có người mới gửi) -> Cập nhật lại biến lưu trữ
+                previousDataString = currentDataString;
+                // -----------------------
+
+                // Bắt đầu vẽ lại bảng
+                tbody.innerHTML = ''; 
+
+                if (data.length > 0) {
+                    data.forEach((user, index) => {
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${index + 1}</td>
+                                <td><strong>${user.login_id}</strong></td>
+                                <td>
+                                    <input type="text" id="pass_${user.id}" placeholder="Mật khẩu mới...">
+                                </td>
+                                <td>
+                                    <button onclick="approve(${user.id})">Duyệt & Reset</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="4" style="color:#777">Không có yêu cầu nào.</td></tr>';
+                }
             }
         } catch (error) {
-            console.error(error);
-            document.getElementById('tableBody').innerHTML = '<tr><td colspan="4" style="color:red">Lỗi tải dữ liệu.</td></tr>';
+            console.error('Lỗi auto-update:', error);
+            // Không hiện lỗi lên màn hình để tránh làm phiền, chỉ log ra console
         }
     }
 
-        async function approve(id) {
-            const pass = document.getElementById(`pass_${id}`).value.trim();
-            if (!pass || pass.length < 6) {
-                alert('Mật khẩu mới phải từ 6 ký tự trở lên!');
-                return;
-            }
+    // Hàm duyệt (Giữ nguyên)
+    async function approve(id) {
+        const passInput = document.getElementById(`pass_${id}`);
+        const newPass = passInput.value.trim();
 
-            if(!confirm('Bạn chắc chắn muốn đổi mật khẩu cho user này?')) return;
-
-            try {
-                const res = await authService.approveReset(id, pass);
-                if (res.success) {
-                    alert('✅ Thành công!');
-                    loadData(); // Tải lại bảng
-                } else {
-                    alert('❌ Lỗi: ' + res.message);
-                }
-            } catch (error) {
-                alert('Lỗi kết nối');
-            }
+        if (!newPass || newPass.length < 6) {
+            alert('Mật khẩu mới phải từ 6 ký tự trở lên!');
+            passInput.focus();
+            return;
         }
 
-        document.addEventListener('DOMContentLoaded', loadData);
-    </script>
+        if(!confirm('Bạn chắc chắn muốn đổi mật khẩu cho user này?')) return;
+
+        try {
+            const res = await authService.approveReset(id, newPass);
+            if (res.success) {
+                alert('✅ Thành công!');
+                // Reset biến so sánh để đảm bảo bảng được cập nhật ngay lập tức
+                previousDataString = ''; 
+                loadData(); 
+            } else {
+                alert('❌ Lỗi: ' + res.message);
+            }
+        } catch (error) {
+            alert('Lỗi kết nối');
+        }
+    }
+
+    // 1. Chạy ngay khi mở trang
+    loadData();
+
+    // 2. TỰ ĐỘNG CẬP NHẬT: Cứ 2 giây (2000ms) gọi hàm loadData 1 lần
+    setInterval(loadData, 2000);
+
+</script>
 </body>
 </html>
