@@ -2,7 +2,11 @@
 // This file is included by api-router.php
 
 require_once __DIR__ . '/../common/db.php';
+require_once __DIR__ . '/../controller/common.php';
 require_once __DIR__ . '/../modules/scores/models/score.php';
+
+// Check Authentication
+checkAuth();
 
 // Parse JSON request body
 $input = json_decode(file_get_contents('php://input'), true);
