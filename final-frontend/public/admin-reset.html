@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Duyệt Reset</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        body { padding: 40px; background: #f4f6f9; font-family: Arial, sans-serif; }
+        .container {
+            background: white; padding: 30px; border-radius: 8px; max-width: 900px; margin: 0 auto;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h2 { color: #333; margin-bottom: 20px; border-bottom: 2px solid #667eea; padding-bottom: 10px;}
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { background: #667eea; color: white; padding: 12px; text-align: center; }
+        td { border-bottom: 1px solid #eee; padding: 12px; text-align: center; vertical-align: middle; }
+        input { padding: 8px; border: 1px solid #ddd; border-radius: 4px; width: 200px; }
+        button { background: #28a745; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #218838; }
+        .home-link { display: inline-block; margin-bottom: 20px; color: #667eea; text-decoration: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="home-link">← Về trang chủ</a>
+        <h2>Danh sách yêu cầu Reset Password</h2>
+        
+        HTML
+
+<table>
+    <thead>
+        <tr>
+            <th style="width: 50px;">NO</th>
+            <th>Tên người dùng</th> <th>Mật khẩu mới</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody id="tableBody">
+        <tr><td colspan="4">Đang tải dữ liệu...</td></tr>
+    </tbody>
+</table>
+    </div>
+
+    <script src="assets/js/services/api.js"></script>
+    <script>
+        async function loadData() {
+        try {
+            const res = await authService.getPendingResets();
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            if (res.success && res.data && res.data.length > 0) {
+                // Thêm index để đếm số thứ tự (NO)
+                res.data.forEach((user, index) => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${index + 1}</td> <td><strong>${user.login_id}</strong></td>
+                            <td>
+                                <input type="text" id="pass_${user.id}" placeholder="">
+                            </td>
+                            <td>
+                                <button onclick="approve(${user.id})">Reset</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } else {
+                tbody.innerHTML = '<tr><td colspan="4" style="color:#777">Không có yêu cầu nào.</td></tr>';
+            }
+        } catch (error) {
+            console.error(error);
+            document.getElementById('tableBody').innerHTML = '<tr><td colspan="4" style="color:red">Lỗi tải dữ liệu.</td></tr>';
+        }
+    }
+
+        async function approve(id) {
+            const pass = document.getElementById(`pass_${id}`).value.trim();
+            if (!pass || pass.length < 6) {
+                alert('Mật khẩu mới phải từ 6 ký tự trở lên!');
+                return;
+            }
+
+            if(!confirm('Bạn chắc chắn muốn đổi mật khẩu cho user này?')) return;
+
+            try {
+                const res = await authService.approveReset(id, pass);
+                if (res.success) {
+                    alert('✅ Thành công!');
+                    loadData(); // Tải lại bảng
+                } else {
+                    alert('❌ Lỗi: ' + res.message);
+                }
+            } catch (error) {
+                alert('Lỗi kết nối');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadData);
+    </script>
+</body>
+</html>
