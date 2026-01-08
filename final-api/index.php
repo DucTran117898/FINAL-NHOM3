@@ -14,7 +14,29 @@ $request_uri = str_replace('/Cuoiky', '', $request_uri);
 error_log("REQUEST_URI: " . $_SERVER['REQUEST_URI']);
 error_log("request_uri after: " . $request_uri);
 
-// For static files, let PHP's built-in server serve them
+// For static files in /web/ directory
+if (strpos($request_uri, '/web/') !== -1) {
+    $file_path = __DIR__ . $request_uri;
+    if (is_file($file_path)) {
+        // Get mime type
+        $mime_type = mime_content_type($file_path);
+        
+        // Set headers
+        header('Content-Type: ' . $mime_type);
+        header('Content-Length: ' . filesize($file_path));
+        header('Access-Control-Allow-Origin: *'); // Allow usage in frontend
+        
+        // Output file
+        readfile($file_path);
+        exit;
+    } else {
+        http_response_code(404);
+        echo 'File not found';
+        exit;
+    }
+}
+
+// For other static files, let PHP's built-in server serve them if they exist
 $file_path = __DIR__ . $request_uri;
 if (is_file($file_path)) {
     return false; // Let the built-in server serve the file
