@@ -13,17 +13,44 @@ $request_uri = str_replace('/Cuoiky', '', $request_uri);
 // Debug
 error_log("REQUEST_URI: " . $_SERVER['REQUEST_URI']);
 error_log("request_uri after: " . $request_uri);
-// For static files in /web/ directory
-
-
-// For other static files, let PHP's built-in server serve them if they exist
 $file_path = __DIR__ . $request_uri;
-if (is_file($file_path)) {
-    return false; // Let the built-in server serve the file
-}
+// if (is_file($file_path)) {
+//     return false; // Let the built-in server serve the file
+// }
 
-// Route API requests
-if (strpos($request_uri, '/api/') === 0) {
+if (str_contains($request_uri, '/web/')) {
+    if (is_file($file_path)) {
+        // Get mime type
+        $extension = strtolower(pathinfo($file_path, PATHINFO_EXTENSION));
+        $mime_types = [
+            'jpg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            'gif' => 'image/gif',
+            'webp' => 'image/webp',
+            'svg' => 'image/svg+xml'
+        ];
+        
+        $mime_type = $mime_types[$extension] ?? 'application/octet-stream';
+
+        if (function_exists('mime_content_type')) {
+             $mime_type = mime_content_type($file_path);
+        }
+        
+        // Set headers
+        header('Content-Type: ' . $mime_type);
+        header('Content-Length: ' . filesize($file_path));
+        header('Access-Control-Allow-Origin: *'); // Allow usage in frontend
+        
+        // Output file
+        readfile($file_path);
+        exit;
+    } else {
+        http_response_code(404);
+        echo 'File not found';
+        exit;
+    }
+} else if (strpos($request_uri, '/api/') === 0) {
     // Set headers for CORS and JSON responses
     header('Content-Type: application/json');
     header('Access-Control-Allow-Origin: *');
@@ -60,7 +87,6 @@ if (strpos($request_uri, '/api/') === 0) {
             exit;
         }
     }
-
     switch ($module) {
         case 'auth':
             require __DIR__ . '/app/api/auth.php';
