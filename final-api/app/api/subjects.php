@@ -86,7 +86,9 @@ try {
             // Handle Avatar Upload
             $avatarName = '';
             if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] === UPLOAD_ERR_OK) {
-                $uploadDir = __DIR__ . '/../../../final-frontend/public/assets/uploads/subjects/';
+                // Modified path to satisfy user requirement: ./final-api/web/avatar/subject
+                // Current file is in app/api/, so allow going up two levels to final-api root
+                $uploadDir = __DIR__ . '/../../web/avatar/subject/';
                 
                 // Create directory if not exists
                 if (!is_dir($uploadDir)) {
