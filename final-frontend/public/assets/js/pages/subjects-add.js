@@ -13,6 +13,12 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function setupEventListeners() {
+    // Prevent default form submission
+    const form = document.getElementById('addSubjectForm');
+    if (form) {
+        form.addEventListener('submit', (e) => e.preventDefault());
+    }
+
     // File Input Preview
     document.getElementById('avatar').addEventListener('change', function (e) {
         const file = e.target.files[0];
@@ -39,9 +45,18 @@ function setupEventListeners() {
     });
 
     // Navigation Buttons
-    document.getElementById('btnToConfirm').addEventListener('click', showConfirm);
-    document.getElementById('btnBackToEdit').addEventListener('click', showInput);
-    document.getElementById('btnRegister').addEventListener('click', registerSubject);
+    document.getElementById('btnToConfirm').addEventListener('click', (e) => {
+        e.preventDefault();
+        showConfirm();
+    });
+    document.getElementById('btnBackToEdit').addEventListener('click', (e) => {
+        e.preventDefault();
+        showInput();
+    });
+    document.getElementById('btnRegister').addEventListener('click', (e) => {
+        e.preventDefault();
+        registerSubject();
+    });
 }
 
 function showConfirm() {
