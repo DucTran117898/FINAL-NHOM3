@@ -51,7 +51,8 @@ class APIClient {
 
             if (response.status === 401) {
                 this.setToken(null);
-                window.location.href = 'login.html';
+                const isNested = window.location.pathname.includes('/subjects/');
+                window.location.href = isNested ? '../login.html' : 'login.html';
             }
 
             if (!response.ok) {

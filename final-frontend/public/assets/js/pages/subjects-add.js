@@ -122,9 +122,8 @@ async function registerSubject() {
 
         await subjectService.create(formData);
 
-        // Show Success Step
-        document.getElementById('step-confirm').classList.remove('active');
-        document.getElementById('step-success').classList.add('active');
+        // Redirect to Success Page
+        window.location.href = 'success.html';
 
     } catch (error) {
         console.error('Failed to create subject:', error);
