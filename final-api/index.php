@@ -19,7 +19,21 @@ if (strpos($request_uri, '/web/') !== -1) {
     $file_path = __DIR__ . $request_uri;
     if (is_file($file_path)) {
         // Get mime type
-        $mime_type = mime_content_type($file_path);
+        $extension = strtolower(pathinfo($file_path, PATHINFO_EXTENSION));
+        $mime_types = [
+            'jpg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            'gif' => 'image/gif',
+            'webp' => 'image/webp',
+            'svg' => 'image/svg+xml'
+        ];
+        
+        $mime_type = $mime_types[$extension] ?? 'application/octet-stream';
+
+        if (function_exists('mime_content_type')) {
+             $mime_type = mime_content_type($file_path);
+        }
         
         // Set headers
         header('Content-Type: ' . $mime_type);
