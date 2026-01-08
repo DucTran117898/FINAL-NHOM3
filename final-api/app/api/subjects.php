@@ -68,7 +68,13 @@ try {
     } elseif ($method === 'POST') {
         if ($action === null || $action === '') {
             // POST /api/subjects - create new
-            if (!$input || !isset($input['name'])) {
+            
+            // Check if request is multipart/form-data (has files)
+            if (!empty($_FILES)) {
+                $input = $_POST;
+            }
+            
+            if (empty($input) || !isset($input['name'])) {
                 http_response_code(400);
                 echo json_encode([
                     'success' => false,
@@ -76,9 +82,39 @@ try {
                 ]);
                 return;
             }
+
+            // Handle Avatar Upload
+            $avatarName = '';
+            if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] === UPLOAD_ERR_OK) {
+                $uploadDir = __DIR__ . '/../../../final-frontend/public/assets/uploads/subjects/';
+                
+                // Create directory if not exists
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0777, true);
+                }
+
+                $extension = pathinfo($_FILES['avatar']['name'], PATHINFO_EXTENSION);
+                // Simple validation for security (allow images only)
+                $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+                if (!in_array(strtolower($extension), $allowed)) {
+                     http_response_code(400);
+                     echo json_encode(['success' => false, 'message' => 'Invalid file type. Only images allowed.']);
+                     return;
+                }
+
+                $avatarName = uniqid('subj_') . '.' . $extension;
+                $targetFile = $uploadDir . $avatarName;
+
+                if (!move_uploaded_file($_FILES['avatar']['tmp_name'], $targetFile)) {
+                    http_response_code(500);
+                    echo json_encode(['success' => false, 'message' => 'Failed to save uploaded file']);
+                    return;
+                }
+            }
+
             $data = [
                 'name' => $input['name'],
-                'avatar' => $input['avatar'] ?? '',
+                'avatar' => $avatarName,
                 'description' => $input['description'] ?? '',
                 'school_year' => $input['school_year'] ?? ''
             ];

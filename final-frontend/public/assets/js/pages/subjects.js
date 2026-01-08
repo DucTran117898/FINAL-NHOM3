@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 function setupEventListeners() {
-    document.getElementById('addBtn').addEventListener('click', openAddModal);
+    // document.getElementById('addBtn').addEventListener('click', openAddModal);
     document.getElementById('modalClose').addEventListener('click', closeModal);
     document.getElementById('cancelBtn').addEventListener('click', closeModal);
     document.getElementById('saveBtn').addEventListener('click', saveSubject);
