@@ -85,9 +85,11 @@ try {
             ];
             $result = $teacherModel->create($data);
             if ($result) {
+                $newTeacher = $teacherModel->getById($result);
                 echo json_encode([
                     'success' => true,
-                    'message' => 'Teacher created successfully'
+                    'message' => 'Teacher created successfully',
+                    'data' => $newTeacher
                 ]);
             } else {
                 http_response_code(500);
@@ -121,11 +123,24 @@ try {
                 'specialized' => $input['specialized'] ?? '',
                 'degree' => $input['degree'] ?? ''
             ];
+            // Check if teacher exists
+            $existingTeacher = $teacherModel->getById($action);
+            if (!$existingTeacher) {
+                http_response_code(404);
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Teacher not found'
+                ]);
+                return;
+            }
+            
             $result = $teacherModel->update($action, $data);
             if ($result) {
+                $updatedTeacher = $teacherModel->getById($action);
                 echo json_encode([
                     'success' => true,
-                    'message' => 'Teacher updated successfully'
+                    'message' => 'Teacher updated successfully',
+                    'data' => $updatedTeacher
                 ]);
             } else {
                 http_response_code(500);
@@ -144,17 +159,36 @@ try {
     } elseif ($method === 'DELETE') {
         if (is_numeric($action)) {
             // DELETE /api/teachers/123 - delete
-            $result = $teacherModel->delete($action);
-            if ($result) {
-                echo json_encode([
-                    'success' => true,
-                    'message' => 'Teacher deleted successfully'
-                ]);
-            } else {
-                http_response_code(500);
+            // Check if teacher exists
+            $existingTeacher = $teacherModel->getById($action);
+            if (!$existingTeacher) {
+                http_response_code(404);
                 echo json_encode([
                     'success' => false,
-                    'message' => 'Failed to delete teacher'
+                    'message' => 'Teacher not found'
+                ]);
+                return;
+            }
+            
+            try {
+                $result = $teacherModel->delete($action);
+                if ($result) {
+                    echo json_encode([
+                        'success' => true,
+                        'message' => 'Teacher deleted successfully'
+                    ]);
+                } else {
+                    http_response_code(500);
+                    echo json_encode([
+                        'success' => false,
+                        'message' => 'Failed to delete teacher'
+                    ]);
+                }
+            } catch (Exception $e) {
+                http_response_code(400);
+                echo json_encode([
+                    'success' => false,
+                    'message' => $e->getMessage()
                 ]);
             }
         } else {
