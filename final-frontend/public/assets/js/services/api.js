@@ -38,7 +38,12 @@ class APIClient {
         }
 
         if (data && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
-            options.body = JSON.stringify(data);
+            if (data instanceof FormData) {
+                options.body = data;
+                delete options.headers['Content-Type'];
+            } else {
+                options.body = JSON.stringify(data);
+            }
         }
 
         try {
@@ -46,7 +51,8 @@ class APIClient {
 
             if (response.status === 401) {
                 this.setToken(null);
-                window.location.href = 'login.html';
+                const isNested = window.location.pathname.includes('/subjects/');
+                window.location.href = isNested ? '../login.html' : 'login.html';
             }
 
             if (!response.ok) {
@@ -96,9 +102,9 @@ const authService = {
 
     // --- THÊM 3 DÒNG NÀY (Dùng đúng chuẩn /api/auth/...) ---
     requestReset: (loginId) => apiClient.post('/api/auth/reset-request', { login_id: loginId }),
-    
+
     getPendingResets: () => apiClient.get('/api/auth/reset-list'),
-    
+
     approveReset: (id, newPassword) => apiClient.post('/api/auth/reset-approve', { id: id, new_password: newPassword })
 };
 

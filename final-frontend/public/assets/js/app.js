@@ -16,8 +16,12 @@ function initializeApp() {
     // Check if user is logged in
     const token = localStorage.getItem('authToken');
     if (!token && !window.location.pathname.includes('login')) {
-        window.location.href = 'login.html';
+        window.location.href = getLoginUrl();
     }
+}
+
+function getLoginUrl() {
+    return window.location.pathname.includes('/subjects/') ? '../login.html' : 'login.html';
 }
 
 /**
@@ -113,13 +117,13 @@ async function handleLogout() {
         apiClient.setToken(null);
         localStorage.removeItem('authToken');
         localStorage.removeItem('user');
-        window.location.href = 'login.html';
+        window.location.href = getLoginUrl();
     } catch (error) {
         console.error('Logout error:', error);
         apiClient.setToken(null);
         localStorage.removeItem('authToken');
         localStorage.removeItem('user');
-        window.location.href = 'login.html';
+        window.location.href = getLoginUrl();
     }
 }
 
@@ -129,7 +133,7 @@ async function handleLogout() {
 function requireAuth() {
     const token = apiClient.getToken();
     if (!token) {
-        window.location.href = 'login.html';
+        window.location.href = getLoginUrl();
         return false;
     }
     return true;
