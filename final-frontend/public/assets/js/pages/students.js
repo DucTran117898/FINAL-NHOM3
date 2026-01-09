@@ -26,6 +26,7 @@ function setupEventListeners() {
         if (e.target.id === 'studentModal') closeModal();
     });
 }
+/*
 
 async function loadStudents(page = 1) {
     try {
@@ -42,33 +43,76 @@ async function loadStudents(page = 1) {
         console.error('Failed to load students:', error);
         AlertUtils.error('Không thể tải danh sách học sinh. Vui lòng thử lại.');
         document.getElementById('tableBody').innerHTML =
-            '<tr><td colspan="6" style="text-align: center; padding: 40px; color: var(--danger);">Lỗi tải dữ liệu</td></tr>';
+            '<tr><td colspan="5" style="text-align: center; padding: 40px; color: var(--danger);">Lỗi tải dữ liệu</td></tr>';
     }
 }
+    */
+
+async function loadStudents(page = 1, limit = 10) {
+    try {
+        showLoading();
+        const response = await studentService.getAll(page, limit);
+
+        console.log('API response:', response);
+
+        const resultCountEl = document.getElementById('resultCount');
+
+        if (response.success) {
+            renderTable(response.data);
+
+            if (response.pagination && typeof response.pagination.total_records === 'number') {
+                resultCountEl.textContent = response.pagination.total_records;
+            } else {
+                resultCountEl.textContent = 0;
+            }
+
+            renderPagination(response.pagination, page);
+        } else {
+            renderTable([]);
+            resultCountEl.textContent = 0;
+        }
+    } catch (error) {
+        console.error('Failed to load students:', error);
+        AlertUtils.error('Không thể tải danh sách học sinh. Vui lòng thử lại.');
+        document.getElementById('tableBody').innerHTML =
+            '<tr><td colspan="5" style="text-align: center; padding: 40px; color: var(--danger);">Lỗi tải dữ liệu</td></tr>';
+        document.getElementById('resultCount').textContent = 0;
+    }
+}
+
+
+
+
+
+
 
 function renderTable(students) {
     const tableBody = document.getElementById('tableBody');
 
     if (!students || students.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 40px;">Không có dữ liệu</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 40px;">Không có dữ liệu</td></tr>';
         return;
     }
 
-    tableBody.innerHTML = students.map((student) => `
+    tableBody.innerHTML = students
+        .map((student, idx) => `
         <tr>
-            <td>${student.id}</td>
-            <td>${student.name}</td>
-            <td>${student.email}</td>
-            <td>${student.classroom_name || 'N/A'}</td>
-            <td>${DateUtils.format(student.created_at)}</td>
+            <td>${idx + 1}</td>
+            <td>${student.name || 'N/A'}</td>
+            <td>${student.description || ''}</td>
             <td>
-                <button class="btn btn-sm btn-outline" onclick="editStudent(${student.id})">✏️ Sửa</button>
-                <button class="btn btn-sm btn-danger" onclick="deleteStudent(${student.id})">🗑️ Xóa</button>
+                <button class="btn btn-sm btn-danger" 
+                onclick="deleteStudent(${student.id}, '${student.name || ''}')">
+                🗑️ Xóa
+                </button>
             </td>
-        </tr>
-    `).join('');
-}
 
+            <td><button class="btn btn-sm btn-outline" onclick="editStudent(${student.id})">✏️ Sửa</button></td>
+        </tr>
+    `)
+        .join('');
+}
+/*
 async function loadClassroomsForSelect() {
     // API not implemented yet
     const select = document.getElementById('classroomId');
@@ -96,6 +140,7 @@ async function loadClassroomsForSelect() {
         select.appendChild(option);
     });
 }
+    */
 
 function openAddModal() {
     currentEditingId = null;
@@ -103,16 +148,20 @@ function openAddModal() {
     document.getElementById('modalTitle').textContent = 'Thêm Học Sinh';
     document.getElementById('studentModal').classList.add('show');
 }
-
+/*
 async function editStudent(id) {
     try {
         const response = await studentService.getById(id);
+        console.log('API response:', response); // kiểm tra dữ liệu thực tế
 
-        if (response) {
-            currentEditingId = id;
-            document.getElementById('name').value = response.name;
-            document.getElementById('email').value = response.email;
-            document.getElementById('classroomId').value = response.classroom_id;
+        if (response && response.success) {
+            // Nếu data là object
+            const student = Array.isArray(response.data) ? response.data[0] : response.data;
+
+            currentEditingId = student.id;
+            document.getElementById('name').value = student.name || '';
+            document.getElementById('description').value = student.description || ''; 
+            document.getElementById('avatar').value = student.avatar || '';
             document.getElementById('modalTitle').textContent = 'Cập Nhật Học Sinh';
             document.getElementById('studentModal').classList.add('show');
         }
@@ -121,29 +170,24 @@ async function editStudent(id) {
         AlertUtils.error('Không thể tải thông tin học sinh.');
     }
 }
+    */
+function editStudent(id) {
+    window.location.href = `student-edit.html?id=${id}`;
+}
+
+
 
 async function saveStudent() {
     const name = document.getElementById('name').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const classroomId = document.getElementById('classroomId').value;
-
+    const description = document.getElementById('description').value.trim(); 
+    const avatar = document.getElementById('avatar').value.trim();
     if (!name) {
         AlertUtils.error('Vui lòng nhập tên học sinh.');
         return;
     }
 
-    if (!email || !ValidationUtils.isEmail(email)) {
-        AlertUtils.error('Vui lòng nhập email hợp lệ.');
-        return;
-    }
-
-    if (!classroomId) {
-        AlertUtils.error('Vui lòng chọn lớp học.');
-        return;
-    }
-
     try {
-        const data = { name, email, classroom_id: classroomId };
+        const data = { name, description, avatar };
 
         if (currentEditingId) {
             await studentService.update(currentEditingId, data);
@@ -161,16 +205,23 @@ async function saveStudent() {
     }
 }
 
-async function deleteStudent(id) {
-    if (!confirm('Bạn chắc chắn muốn xóa học sinh này?')) return;
+async function deleteStudent(id, name) {
+    // Hiện popup confirm với tên sinh viên
+    const confirmed = confirm(`Bạn chắc chắn muốn xóa sinh viên ${name}?`);
+    if (!confirmed) return; // Nếu Cancel thì dừng, không xử lý gì
 
     try {
+        // Gọi API xóa
         await studentService.delete(id);
-        AlertUtils.success('Xóa học sinh thành công!');
+
+        // Thông báo thành công
+        AlertUtils.success(`Đã xóa sinh viên ${name} thành công!`);
+
+        // Refresh lại danh sách
         loadStudents();
     } catch (error) {
         console.error('Failed to delete student:', error);
-        AlertUtils.error('Không thể xóa học sinh. Vui lòng thử lại.');
+        AlertUtils.error(`Không thể xóa sinh viên ${name}. Vui lòng thử lại.`);
     }
 }
 
@@ -184,10 +235,25 @@ async function searchStudents() {
 
     try {
         showLoading();
-        const response = await studentService.search(query);
+        const page = 1;
+        const limit = 10;
+        const response = await studentService.search(query, page, limit);
 
-        if (response) {
-            renderTable(response.data || []);
+        const resultCountEl = document.getElementById('resultCount');
+
+        if (response && response.success && Array.isArray(response.data)) {
+            renderTable(response.data);
+            // Update result count (use pagination if available)
+            if (response.pagination && typeof response.pagination.total_records === 'number') {
+                resultCountEl.textContent = response.pagination.total_records;
+            } else {
+                resultCountEl.textContent = response.data.length || 0;
+            }
+            renderPagination(response.pagination, page);
+        } else {
+            renderTable([]);
+            if (resultCountEl) resultCountEl.textContent = '0';
+            document.getElementById('paginationContainer').innerHTML = '';
         }
     } catch (error) {
         console.error('Search error:', error);
@@ -232,5 +298,5 @@ function closeModal() {
 
 function showLoading() {
     document.getElementById('tableBody').innerHTML =
-        '<tr><td colspan="6" style="text-align: center; padding: 40px;"><div class="spinner"></div> Đang tải...</td></tr>';
+        '<tr><td colspan="5" style="text-align: center; padding: 40px;"><div class="spinner"></div> Đang tải...</td></tr>';
 }
