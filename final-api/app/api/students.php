@@ -16,64 +16,81 @@ $method = $_SERVER['REQUEST_METHOD'];
 $request_uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
 // Extract the action from the URL
-// /api/students -> list all
-// /api/students/123 -> get by id
 $parts = explode('/', trim($request_uri, '/'));
 array_shift($parts); // remove 'api'
 array_shift($parts); // remove 'students'
-$action = array_shift($parts); // get action or id
+$action = array_shift($parts);
 
 // Log for debugging
 error_log("Method: $method, Action: $action, URI: $request_uri");
+
+// Luôn set header JSON
+header('Content-Type: application/json; charset=utf-8');
 
 try {
     $studentModel = new Student();
 
     if ($method === 'GET') {
         if ($action === null || $action === '') {
-            // GET /api/students - list all or search
-            $keyword = $_GET['keyword'] ?? '';
-            if (!empty($keyword)) {
-                $students = $studentModel->search($keyword);
-            } else {
-                $students = $studentModel->getAll();
-            }
+            $keyword = $_GET['keyword'] ?? ''; 
+            $page = isset($_GET['page']) ? (int)$_GET['page'] : 1; 
+            $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10; 
+            $offset = ($page - 1) * $limit; 
+
+            if (!empty($keyword)) { 
+                $students = $studentModel->search($keyword, $limit, $offset); 
+                $total = $studentModel->countSearch($keyword); 
+            } else { 
+                $students = $studentModel->getAll($limit, $offset); 
+                $total = $studentModel->countAll(); 
+            } 
+            error_log("Students: " . json_encode($students));
+            error_log("Total: " . $total);
+
+
             echo json_encode([
                 'success' => true,
-                'data' => $students
-            ]);
+                'data' => $students,
+                'pagination' => [
+                    'current_page' => $page,
+                    'total_pages' => ceil($total / $limit),
+                    'total_records' => $total
+                ]
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
         } elseif (is_numeric($action)) {
-            // GET /api/students/123 - get by id
             $student = $studentModel->getById($action);
             if ($student) {
                 echo json_encode([
                     'success' => true,
                     'data' => $student
-                ]);
+                ], JSON_UNESCAPED_UNICODE);
+                exit;
             } else {
                 http_response_code(404);
                 echo json_encode([
                     'success' => false,
                     'message' => 'Student not found'
-                ]);
+                ], JSON_UNESCAPED_UNICODE);
+                exit;
             }
         } else {
             http_response_code(400);
             echo json_encode([
                 'success' => false,
                 'message' => 'Invalid request'
-            ]);
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
         }
     } elseif ($method === 'POST') {
         if ($action === null || $action === '') {
-            // POST /api/students - create new
             if (!$input || !isset($input['name'])) {
                 http_response_code(400);
                 echo json_encode([
                     'success' => false,
                     'message' => 'Name is required'
-                ]);
-                return;
+                ], JSON_UNESCAPED_UNICODE);
+                exit;
             }
             $data = [
                 'name' => $input['name'],
@@ -85,31 +102,33 @@ try {
                 echo json_encode([
                     'success' => true,
                     'message' => 'Student created successfully'
-                ]);
+                ], JSON_UNESCAPED_UNICODE);
+                exit;
             } else {
                 http_response_code(500);
                 echo json_encode([
                     'success' => false,
                     'message' => 'Failed to create student'
-                ]);
+                ], JSON_UNESCAPED_UNICODE);
+                exit;
             }
         } else {
             http_response_code(400);
             echo json_encode([
                 'success' => false,
                 'message' => 'Invalid request'
-            ]);
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
         }
     } elseif ($method === 'PUT') {
         if (is_numeric($action)) {
-            // PUT /api/students/123 - update
-            if (!$input || !isset($input['name'])) {
+            if (!$input || !isset($input['name'])|| trim($input['name']) === '') {
                 http_response_code(400);
                 echo json_encode([
                     'success' => false,
                     'message' => 'Name is required'
-                ]);
-                return;
+                ], JSON_UNESCAPED_UNICODE);
+                exit;
             }
             $data = [
                 'name' => $input['name'],
@@ -121,57 +140,62 @@ try {
                 echo json_encode([
                     'success' => true,
                     'message' => 'Student updated successfully'
-                ]);
+                ], JSON_UNESCAPED_UNICODE);
+                exit;
             } else {
                 http_response_code(500);
                 echo json_encode([
                     'success' => false,
                     'message' => 'Failed to update student'
-                ]);
+                ], JSON_UNESCAPED_UNICODE);
+                exit;
             }
         } else {
             http_response_code(400);
             echo json_encode([
                 'success' => false,
                 'message' => 'Invalid request'
-            ]);
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
         }
     } elseif ($method === 'DELETE') {
         if (is_numeric($action)) {
-            // DELETE /api/students/123 - delete
             $result = $studentModel->delete($action);
             if ($result) {
                 echo json_encode([
                     'success' => true,
                     'message' => 'Student deleted successfully'
-                ]);
+                ], JSON_UNESCAPED_UNICODE);
+                exit;
             } else {
                 http_response_code(500);
                 echo json_encode([
                     'success' => false,
                     'message' => 'Failed to delete student'
-                ]);
+                ], JSON_UNESCAPED_UNICODE);
+                exit;
             }
         } else {
             http_response_code(400);
             echo json_encode([
                 'success' => false,
                 'message' => 'Invalid request'
-            ]);
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
         }
     } else {
         http_response_code(405);
         echo json_encode([
             'success' => false,
             'message' => 'Method not allowed'
-        ]);
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
     }
 } catch (Exception $e) {
     http_response_code(500);
     echo json_encode([
         'success' => false,
         'message' => 'Server error: ' . $e->getMessage()
-    ]);
+    ], JSON_UNESCAPED_UNICODE);
+    exit;
 }
-?></content>
-<parameter name="filePath">d:\Last_Semester\Web\Cuoiky\final-api\app\api\students.php

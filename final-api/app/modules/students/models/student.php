@@ -8,26 +8,6 @@ class Student {
         $this->db = Database::getInstance()->getConnection();
     }
 
-    public function search($keyword = '') {
-        $sql = "SELECT * FROM students WHERE 1=1";
-        $params = [];
-
-        if (!empty($keyword)) {
-            $sql .= " AND (name ILIKE ? OR description ILIKE ?)";
-            $params[] = '%' . $keyword . '%';
-            $params[] = '%' . $keyword . '%';
-        }
-
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute($params);
-        return $stmt->fetchAll();
-    }
-
-    public function getAll() {
-        $stmt = $this->db->query("SELECT * FROM students ORDER BY id");
-        return $stmt->fetchAll();
-    }
-
     public function getById($id) {
         $stmt = $this->db->prepare("SELECT * FROM students WHERE id = ?");
         $stmt->execute([$id]);
@@ -48,5 +28,53 @@ class Student {
         $stmt = $this->db->prepare("DELETE FROM students WHERE id = ?");
         return $stmt->execute([$id]);
     }
+
+    public function getAll($limit = 10, $offset = 0) {
+        $stmt = $this->db->prepare("SELECT * FROM students ORDER BY id DESC LIMIT ? OFFSET ?");
+        $stmt->bindValue(1, $limit, PDO::PARAM_INT);
+        $stmt->bindValue(2, $offset, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function countAll() {
+    $stmt = $this->db->query("SELECT COUNT(*) as cnt FROM students");
+    return $stmt->fetch(PDO::FETCH_ASSOC)['cnt'];
+    }
+
+
+    public function search($keyword, $limit = 10, $offset = 0) {
+        $sql = "SELECT * FROM students 
+            WHERE name LIKE ? OR description LIKE ? 
+            ORDER BY id DESC 
+            LIMIT ? OFFSET ?";
+        $stmt = $this->db->prepare($sql);
+
+        $like = '%' . $keyword . '%';
+        $stmt->bindValue(1, $like, PDO::PARAM_STR);
+        $stmt->bindValue(2, $like, PDO::PARAM_STR);
+        $stmt->bindValue(3, (int)$limit, PDO::PARAM_INT);
+        $stmt->bindValue(4, (int)$offset, PDO::PARAM_INT);
+
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function countSearch($keyword) {
+        $sql = "SELECT COUNT(*) as cnt 
+            FROM students 
+            WHERE name LIKE ? OR description LIKE ?";
+        $stmt = $this->db->prepare($sql);
+
+        $like = '%' . $keyword . '%';
+        $stmt->execute([$like, $like]);
+
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row['cnt'];
+    }
+
+
+    
+
 }
 ?>

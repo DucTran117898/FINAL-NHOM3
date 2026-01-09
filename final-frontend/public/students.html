@@ -46,21 +46,26 @@
                     </div>
                 </div>
 
+                <div id="searchResultInfo" style="margin-bottom: 10px; font-weight: 500;">
+                    Số kết quả tìm kiếm: <strong id="resultCount">0</strong>
+                </div>
+
+
                 <div class="table-wrapper">
                     <table id="studentsTable">
                         <thead>
                             <tr>
-                                <th>ID</th>
+                                <th>NO</th>
                                 <th>Tên Học Sinh</th>
-                                <th>Email</th>
-                                <th>Lớp Học</th>
-                                <th>Ngày Tạo</th>
-                                <th>Hành Động</th>
+                                <th>Mô Tả chi tiết</th>
+                                <th>Xóa</th>
+                                <th>Sửa</th>
+                                
                             </tr>
                         </thead>
                         <tbody id="tableBody">
                             <tr>
-                                <td colspan="6" style="text-align: center; padding: 40px;">Đang tải dữ liệu...</td>
+                                <td colspan="5" style="text-align: center; padding: 40px;">Đang tải dữ liệu...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -84,15 +89,13 @@
                         <label for="name">Tên Học Sinh:</label>
                         <input type="text" id="name" required>
                     </div>
-                    <div class="form-group">
-                        <label for="email">Email:</label>
-                        <input type="email" id="email" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="classroomId">Lớp Học:</label>
-                        <select id="classroomId" required>
-                            <option value="">-- Chọn Lớp Học --</option>
-                        </select>
+                    <div class="form-group"> 
+                        <label for="description">Mô Tả chi tiết:</label> 
+                        <textarea id="description"></textarea> 
+                    </div> 
+                    <div class="form-group"> 
+                        <label for="avatar">Avatar (tên file):</label> 
+                        <input type="text" id="avatar"> 
                     </div>
                 </form>
             </div>
@@ -107,6 +110,7 @@
     <script src="assets/js/utils/helpers.js"></script>
     <script src="assets/js/app.js"></script>
     <script src="assets/js/pages/students.js"></script>
+    
 </body>
 
 </html>

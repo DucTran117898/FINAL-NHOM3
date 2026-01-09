@@ -62,8 +62,17 @@ class APIClient {
                 throw new Error(error.message || `HTTP ${response.status}`);
             }
 
-            const responseData = await response.json().catch(() => null);
+            const contentType = response.headers.get('Content-Type');
+            let responseData = null;
+
+            if (contentType && contentType.includes('application/json')) {
+                responseData = await response.json();
+            } 
+            else {
+                responseData = null;
+            }
             return responseData;
+
         } catch (error) {
             console.error('API Error:', error);
             throw error;
@@ -130,13 +139,22 @@ const teacherService = {
 
 // Student Service
 const studentService = {
-    getAll: () => apiClient.get('/api/students'),
+    getAll: (page = 1, limit = 10) => 
+        apiClient.get(`/api/students?page=${page}&limit=${limit}`),
+
+
     getById: (id) => apiClient.get(`/api/students/${id}`),
+
     create: (data) => apiClient.post('/api/students', data),
+
     update: (id, data) => apiClient.put(`/api/students/${id}`, data),
+
     delete: (id) => apiClient.delete(`/api/students/${id}`),
-    search: (query) => apiClient.get(`/api/students?keyword=${encodeURIComponent(query)}`),
+
+    search: (query, page = 1, limit = 10) => 
+        apiClient.get(`/api/students?keyword=${encodeURIComponent(query)}&page=${page}&limit=${limit}`),
 };
+
 
 // Score Service
 const scoreService = {
