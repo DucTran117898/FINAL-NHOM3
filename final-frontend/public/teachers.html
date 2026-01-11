@@ -14,7 +14,7 @@
             <div class="sidebar-logo">📚 Quản Lý Trường</div>
             <ul class="sidebar-menu">
                 <li><a href="index.html" class="nav-link" data-page="dashboard">🏠 Dashboard</a></li>
-                <li><a href="subjects.html" class="nav-link" data-page="subjects">📖 Môn Học</a></li>
+                <li><a href="subjects/index.html" class="nav-link" data-page="subjects">📖 Môn Học</a></li>
                 <li><a href="teachers.html" class="nav-link active" data-page="teachers">👨‍🏫 Giáo Viên</a></li>
                 <li><a href="students.html" class="nav-link" data-page="students">👨‍🎓 Học Sinh</a></li>
                 <li><a href="scores.html" class="nav-link" data-page="scores">📊 Điểm Số</a></li>
@@ -52,16 +52,15 @@
                             <tr>
                                 <th>ID</th>
                                 <th>Tên Giáo Viên</th>
-                                <th>Chuyên Ngành</th>
-                                <th>Bằng Cấp</th>
-                                <th>Mô Tả</th>
+                                <th>Email</th>
+                                <th>Điện Thoại</th>
                                 <th>Ngày Tạo</th>
                                 <th>Hành Động</th>
                             </tr>
                         </thead>
                         <tbody id="tableBody">
                             <tr>
-                                <td colspan="7" style="text-align: center; padding: 40px;">Đang tải dữ liệu...</td>
+                                <td colspan="6" style="text-align: center; padding: 40px;">Đang tải dữ liệu...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -82,24 +81,16 @@
             <div class="modal-body">
                 <form id="teacherForm">
                     <div class="form-group">
-                        <label for="name">Tên Giáo Viên: <span style="color: red;">*</span></label>
+                        <label for="name">Tên Giáo Viên:</label>
                         <input type="text" id="name" required>
                     </div>
                     <div class="form-group">
-                        <label for="specialized">Chuyên Ngành:</label>
-                        <input type="text" id="specialized" placeholder="VD: MATH, PHYS, CHEM...">
+                        <label for="email">Email:</label>
+                        <input type="email" id="email" required>
                     </div>
                     <div class="form-group">
-                        <label for="degree">Bằng Cấp:</label>
-                        <input type="text" id="degree" placeholder="VD: BACHELOR, MASTER, PHD...">
-                    </div>
-                    <div class="form-group">
-                        <label for="description">Mô Tả:</label>
-                        <textarea id="description" rows="3"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="avatar">Avatar (tên file):</label>
-                        <input type="text" id="avatar" placeholder="Tên file avatar (tùy chọn)">
+                        <label for="phone">Điện Thoại:</label>
+                        <input type="text" id="phone">
                     </div>
                 </form>
             </div>
