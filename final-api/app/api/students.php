@@ -8,8 +8,12 @@ require_once __DIR__ . '/../modules/students/models/student.php';
 // Check Authentication
 checkAuth();
 
-// Parse JSON request body
+// Parse request body - support both JSON and multipart/form-data
 $input = json_decode(file_get_contents('php://input'), true);
+// If multipart/form-data (has files), use $_POST instead
+if (!empty($_FILES)) {
+    $input = $_POST;
+}
 
 // Get the request method and path
 $method = $_SERVER['REQUEST_METHOD'];
@@ -32,18 +36,18 @@ try {
 
     if ($method === 'GET') {
         if ($action === null || $action === '') {
-            $keyword = $_GET['keyword'] ?? ''; 
-            $page = isset($_GET['page']) ? (int)$_GET['page'] : 1; 
-            $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10; 
-            $offset = ($page - 1) * $limit; 
+            $keyword = $_GET['keyword'] ?? '';
+            $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+            $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10;
+            $offset = ($page - 1) * $limit;
 
-            if (!empty($keyword)) { 
-                $students = $studentModel->search($keyword, $limit, $offset); 
-                $total = $studentModel->countSearch($keyword); 
-            } else { 
-                $students = $studentModel->getAll($limit, $offset); 
-                $total = $studentModel->countAll(); 
-            } 
+            if (!empty($keyword)) {
+                $students = $studentModel->search($keyword, $limit, $offset);
+                $total = $studentModel->countSearch($keyword);
+            } else {
+                $students = $studentModel->getAll($limit, $offset);
+                $total = $studentModel->countAll();
+            }
             error_log("Students: " . json_encode($students));
             error_log("Total: " . $total);
 
@@ -92,9 +96,46 @@ try {
                 ], JSON_UNESCAPED_UNICODE);
                 exit;
             }
+
+            // Handle Avatar Upload
+            $avatarPath = '';
+            if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] === UPLOAD_ERR_OK) {
+                // Path: ./final-api/web/avatar
+                $uploadDir = __DIR__ . '/../../web/avatar/';
+
+                // Create directory if not exists
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0777, true);
+                }
+
+                $extension = pathinfo($_FILES['avatar']['name'], PATHINFO_EXTENSION);
+                // Simple validation for security (allow images only)
+                $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+                if (!in_array(strtolower($extension), $allowed)) {
+                    http_response_code(400);
+                    echo json_encode(['success' => false, 'message' => 'Invalid file type. Only images allowed.'], JSON_UNESCAPED_UNICODE);
+                    exit;
+                }
+
+                $avatarFileName = uniqid('stu_') . '.' . $extension;
+                $targetFile = $uploadDir . $avatarFileName;
+
+                if (!move_uploaded_file($_FILES['avatar']['tmp_name'], $targetFile)) {
+                    http_response_code(500);
+                    echo json_encode(['success' => false, 'message' => 'Failed to save uploaded file'], JSON_UNESCAPED_UNICODE);
+                    exit;
+                }
+
+                // Lưu đường dẫn tương đối vào database: avatar/filename.jpg
+                $avatarPath = 'avatar/' . $avatarFileName;
+            } elseif (isset($input['avatar']) && !empty($input['avatar'])) {
+                // If avatar is provided as string (from JSON), use it directly
+                $avatarPath = $input['avatar'];
+            }
+
             $data = [
                 'name' => $input['name'],
-                'avatar' => $input['avatar'] ?? '',
+                'avatar' => $avatarPath,
                 'description' => $input['description'] ?? ''
             ];
             $result = $studentModel->create($data);
@@ -122,7 +163,10 @@ try {
         }
     } elseif ($method === 'PUT') {
         if (is_numeric($action)) {
-            if (!$input || !isset($input['name'])|| trim($input['name']) === '') {
+            // Lấy dữ liệu JSON
+            $input = json_decode(file_get_contents('php://input'), true);
+
+            if (!$input || !isset($input['name']) || trim($input['name']) === '') {
                 http_response_code(400);
                 echo json_encode([
                     'success' => false,
@@ -130,26 +174,72 @@ try {
                 ], JSON_UNESCAPED_UNICODE);
                 exit;
             }
+
+            $avatarPath = ''; // mặc định rỗng
+
+            // === Xử lý avatar base64 nếu có ===
+            if (!empty($input['avatar']) && str_starts_with($input['avatar'], 'data:image/')) {
+                $dataUri = $input['avatar'];
+                $matches = [];
+                if (preg_match('/^data:image\/(\w+);base64,/', $dataUri, $matches)) {
+                    $extension = strtolower($matches[1]);
+                    $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+                    if (!in_array($extension, $allowed)) {
+                        http_response_code(400);
+                        echo json_encode(['success' => false, 'message' => 'Invalid image type'], JSON_UNESCAPED_UNICODE);
+                        exit;
+                    }
+
+                    $base64Str = substr($dataUri, strpos($dataUri, ',') + 1);
+                    $imageData = base64_decode($base64Str);
+
+                    if ($imageData === false) {
+                        http_response_code(400);
+                        echo json_encode(['success' => false, 'message' => 'Invalid base64 image'], JSON_UNESCAPED_UNICODE);
+                        exit;
+                    }
+
+                    // Tạo thư mục nếu chưa tồn tại
+                    $uploadDir = __DIR__ . '/../../web/avatar/';
+                    if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
+
+                    $fileName = uniqid('stu_') . '.' . $extension;
+                    $filePath = $uploadDir . $fileName;
+
+                    if (file_put_contents($filePath, $imageData) === false) {
+                        http_response_code(500);
+                        echo json_encode(['success' => false, 'message' => 'Failed to save file'], JSON_UNESCAPED_UNICODE);
+                        exit;
+                    }
+
+                    $avatarPath = $fileName; // chỉ lưu tên file
+                }
+            } else if (isset($input['avatar']) && !empty($input['avatar'])) {
+                // Nếu gửi avatar là string (tên file cũ) -> giữ nguyên
+                $avatarPath = $input['avatar'];
+            }
+
+            // === Cập nhật dữ liệu ===
             $data = [
                 'name' => $input['name'],
-                'avatar' => $input['avatar'] ?? '',
+                'avatar' => $avatarPath,
                 'description' => $input['description'] ?? ''
             ];
+
             $result = $studentModel->update($action, $data);
             if ($result) {
                 echo json_encode([
                     'success' => true,
                     'message' => 'Student updated successfully'
                 ], JSON_UNESCAPED_UNICODE);
-                exit;
             } else {
                 http_response_code(500);
                 echo json_encode([
                     'success' => false,
                     'message' => 'Failed to update student'
                 ], JSON_UNESCAPED_UNICODE);
-                exit;
             }
+            exit;
         } else {
             http_response_code(400);
             echo json_encode([
