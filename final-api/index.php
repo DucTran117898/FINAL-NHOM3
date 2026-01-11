@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Main Entry Point - Handle both API routes and redirects
  */
@@ -30,18 +31,18 @@ if (str_contains($request_uri, '/web/')) {
             'webp' => 'image/webp',
             'svg' => 'image/svg+xml'
         ];
-        
+
         $mime_type = $mime_types[$extension] ?? 'application/octet-stream';
 
         if (function_exists('mime_content_type')) {
-             $mime_type = mime_content_type($file_path);
+            $mime_type = mime_content_type($file_path);
         }
-        
+
         // Set headers
         header('Content-Type: ' . $mime_type);
         header('Content-Length: ' . filesize($file_path));
         header('Access-Control-Allow-Origin: *'); // Allow usage in frontend
-        
+
         // Output file
         readfile($file_path);
         exit;
@@ -132,4 +133,3 @@ if (str_contains($request_uri, '/web/')) {
     ]);
     exit;
 }
-?>
