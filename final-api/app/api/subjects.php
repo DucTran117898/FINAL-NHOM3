@@ -143,6 +143,12 @@ try {
     } elseif ($method === 'PUT') {
         if (is_numeric($action)) {
             // PUT /api/subjects/123 - update
+            // Support both JSON body and multipart/form-data (file upload)
+            // If files are present, use $_POST as input to get form fields
+            if (!empty($_FILES)) {
+                $input = $_POST;
+            }
+
             if (!$input || !isset($input['name'])) {
                 http_response_code(400);
                 echo json_encode([
@@ -151,12 +157,66 @@ try {
                 ]);
                 return;
             }
+
+            // Default: keep previous avatar unless a new file is uploaded
+            $existing = $subjectModel->getById($action);
+            $existingAvatar = $existing['avatar'] ?? '';
+            $avatarName = $existingAvatar;
+
+            // Handle Avatar Upload (if a file was sent)
+            if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] === UPLOAD_ERR_OK) {
+                // Reuse the same upload dir as POST
+                $uploadDir = __DIR__ . '/../../web/avatar/subject/';
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0777, true);
+                }
+
+                // Basic validation: size limit and mime/type
+                $maxSize = 2 * 1024 * 1024; // 2MB
+                if ($_FILES['avatar']['size'] > $maxSize) {
+                    http_response_code(400);
+                    echo json_encode(['success' => false, 'message' => 'File is too large. Max 2MB allowed.']);
+                    return;
+                }
+
+                $finfo = finfo_open(FILEINFO_MIME_TYPE);
+                $mime = finfo_file($finfo, $_FILES['avatar']['tmp_name']);
+                finfo_close($finfo);
+                $allowedMimes = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/gif' => 'gif', 'image/webp' => 'webp'];
+                if (!array_key_exists($mime, $allowedMimes)) {
+                    http_response_code(400);
+                    echo json_encode(['success' => false, 'message' => 'Invalid file type. Only images allowed.']);
+                    return;
+                }
+
+                $extension = $allowedMimes[$mime];
+                $avatarName = uniqid('subj_') . '.' . $extension;
+                $targetFile = $uploadDir . $avatarName;
+
+                if (!move_uploaded_file($_FILES['avatar']['tmp_name'], $targetFile)) {
+                    http_response_code(500);
+                    echo json_encode(['success' => false, 'message' => 'Failed to save uploaded file']);
+                    return;
+                }
+                // set safe permissions
+                @chmod($targetFile, 0644);
+
+                // If there was an existing avatar file, attempt to remove it (avoid orphan files)
+                if (!empty($existingAvatar)) {
+                    $oldFile = $uploadDir . $existingAvatar;
+                    if (is_file($oldFile)) {
+                        @unlink($oldFile);
+                    }
+                }
+            }
+
             $data = [
                 'name' => $input['name'],
-                'avatar' => $input['avatar'] ?? '',
+                'avatar' => $avatarName,
                 'description' => $input['description'] ?? '',
                 'school_year' => $input['school_year'] ?? ''
             ];
+
             $result = $subjectModel->update($action, $data);
             if ($result) {
                 echo json_encode([
