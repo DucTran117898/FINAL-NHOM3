@@ -73,8 +73,5 @@ class Student {
         return $row['cnt'];
     }
 
-
-    
-
 }
 ?>
