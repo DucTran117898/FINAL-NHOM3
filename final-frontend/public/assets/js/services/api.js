@@ -53,13 +53,20 @@ class APIClient {
                 this.setToken(null);
                 const isNested = window.location.pathname.includes('/subjects/');
                 window.location.href = isNested ? '../login.html' : 'login.html';
+                return null; // Stop execution after redirect
             }
 
             if (!response.ok) {
-                const error = await response.json().catch(() => ({
+                const errorData = await response.json().catch(() => ({
                     message: response.statusText,
                 }));
-                throw new Error(error.message || `HTTP ${response.status}`);
+
+                let errorMessage = errorData.message || `HTTP ${response.status}`;
+                if (errorData.errors) {
+                    errorMessage = Object.values(errorData.errors).join('\n');
+                }
+
+                throw new Error(errorMessage);
             }
 
             const contentType = response.headers.get('Content-Type');
@@ -67,8 +74,7 @@ class APIClient {
 
             if (contentType && contentType.includes('application/json')) {
                 responseData = await response.json();
-            } 
-            else {
+            } else {
                 responseData = null;
             }
             return responseData;
@@ -129,7 +135,7 @@ const subjectService = {
 
 // Teacher Service
 const teacherService = {
-    getAll: () => apiClient.get('/api/teachers'),
+    getAll: (page = 1, limit = 10) => apiClient.get(`/api/teachers?page=${page}&limit=${limit}&t=${Date.now()}`),
     getById: (id) => apiClient.get(`/api/teachers/${id}`),
     create: (data) => apiClient.post('/api/teachers', data),
     update: (id, data) => apiClient.put(`/api/teachers/${id}`, data),
@@ -139,7 +145,7 @@ const teacherService = {
 
 // Student Service
 const studentService = {
-    getAll: (page = 1, limit = 10) => 
+    getAll: (page = 1, limit = 10) =>
         apiClient.get(`/api/students?page=${page}&limit=${limit}`),
 
 
@@ -151,7 +157,7 @@ const studentService = {
 
     delete: (id) => apiClient.delete(`/api/students/${id}`),
 
-    search: (query, page = 1, limit = 10) => 
+    search: (query, page = 1, limit = 10) =>
         apiClient.get(`/api/students?keyword=${encodeURIComponent(query)}&page=${page}&limit=${limit}`),
 };
 

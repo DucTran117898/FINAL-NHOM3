@@ -108,6 +108,10 @@ if (str_contains($request_uri, '/web/')) {
             require __DIR__ . '/app/api/scores.php';
             break;
 
+        case 'teacher_register':
+            require __DIR__ . '/app/controller/teacher_register.php';
+            break;
+
         default:
             http_response_code(404);
             echo json_encode([
