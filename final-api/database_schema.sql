@@ -48,8 +48,10 @@ CREATE TABLE teachers (
 );
 
 -- Sample teachers
-INSERT INTO teachers (name, specialized, degree, created) VALUES ('Nguyen Van A', 'MATH', 'MASTER', NOW());
-INSERT INTO teachers (name, specialized, degree, created) VALUES ('Tran Thi B', 'PHYS', 'PHD', NOW());
+-- specialized: 001=Khoa học máy tính, 002=Khoa học dữ liệu, 003=Hải dương học
+-- degree: 001=Cử nhân, 002=Thạc sĩ, 003=Tiến sĩ, 004=Phó giáo sư, 005=Giáo sư
+INSERT INTO teachers (name, specialized, degree, created) VALUES ('Nguyen Van A', '001', '002', NOW());
+INSERT INTO teachers (name, specialized, degree, created) VALUES ('Tran Thi B', '002', '003', NOW());
 
 -- Table: students
 CREATE TABLE students (
