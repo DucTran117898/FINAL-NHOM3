@@ -38,12 +38,7 @@ class APIClient {
         }
 
         if (data && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
-            if (data instanceof FormData) {
-                options.body = data;
-                delete options.headers['Content-Type'];
-            } else {
-                options.body = JSON.stringify(data);
-            }
+            options.body = JSON.stringify(data);
         }
 
         try {
@@ -51,8 +46,7 @@ class APIClient {
 
             if (response.status === 401) {
                 this.setToken(null);
-                const isNested = window.location.pathname.includes('/subjects/');
-                window.location.href = isNested ? '../login.html' : 'login.html';
+                window.location.href = 'login.html';
             }
 
             if (!response.ok) {
@@ -111,9 +105,9 @@ const authService = {
 
     // --- THÊM 3 DÒNG NÀY (Dùng đúng chuẩn /api/auth/...) ---
     requestReset: (loginId) => apiClient.post('/api/auth/reset-request', { login_id: loginId }),
-
+    
     getPendingResets: () => apiClient.get('/api/auth/reset-list'),
-
+    
     approveReset: (id, newPassword) => apiClient.post('/api/auth/reset-approve', { id: id, new_password: newPassword })
 };
 
@@ -134,7 +128,12 @@ const teacherService = {
     create: (data) => apiClient.post('/api/teachers', data),
     update: (id, data) => apiClient.put(`/api/teachers/${id}`, data),
     delete: (id) => apiClient.delete(`/api/teachers/${id}`),
-    search: (query) => apiClient.get(`/api/teachers?keyword=${encodeURIComponent(query)}`),
+    search: (query, specialized = '') => {
+        const params = new URLSearchParams();
+        if (query) params.append('keyword', query);
+        if (specialized) params.append('specialized', specialized);
+        return apiClient.get(`/api/teachers?${params.toString()}`);
+    },
 };
 
 // Student Service
@@ -181,3 +180,4 @@ const classroomService = {
     delete: (id) => apiClient.delete(`/api/classrooms/${id}`),
     search: (query) => apiClient.get(`/api/classrooms?keyword=${encodeURIComponent(query)}`),
 };
+
