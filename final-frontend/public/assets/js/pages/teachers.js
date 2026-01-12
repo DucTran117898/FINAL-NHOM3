@@ -74,21 +74,8 @@ function openAddModal() {
 }
 
 async function editTeacher(id) {
-    try {
-        const response = await teacherService.getById(id);
-
-        if (response) {
-            currentEditingId = id;
-            document.getElementById('name').value = response.name;
-            document.getElementById('email').value = response.email;
-            document.getElementById('phone').value = response.phone || '';
-            document.getElementById('modalTitle').textContent = 'Cập Nhật Giáo Viên';
-            document.getElementById('teacherModal').classList.add('show');
-        }
-    } catch (error) {
-        console.error('Failed to load teacher:', error);
-        AlertUtils.error('Không thể tải thông tin giáo viên.');
-    }
+    // Redirect to teacher edit page with multi-step form
+    window.location.href = `teacher_edit.html?id=${id}`;
 }
 
 async function saveTeacher() {
