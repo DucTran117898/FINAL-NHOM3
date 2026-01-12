@@ -1,48 +1,202 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
-  <meta charset="UTF-8">
-  <title>Chỉnh sửa Học Sinh</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thêm Môn Học - Hệ Thống Quản Lý Trường Học</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        .step-container {
+            display: none;
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .step-container.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        .form-control:focus {
+            border-color: #4a90e2;
+            outline: none;
+        }
+
+        .preview-image {
+            max-width: 200px;
+            max-height: 200px;
+            margin-top: 10px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            display: none;
+        }
+
+        .preview-image.show {
+            display: block;
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .confirm-row {
+            display: flex;
+            border-bottom: 1px solid #eee;
+            padding: 15px 0;
+        }
+
+        .confirm-label {
+            width: 150px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .confirm-value {
+            flex: 1;
+        }
+
+        .success-message {
+            text-align: center;
+            padding: 50px 0;
+        }
+
+        .success-icon {
+            font-size: 60px;
+            color: #28a745;
+            margin-bottom: 20px;
+        }
+
+        .success-title {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+    </style>
 </head>
-<body class="bg-light">
 
-<div class="container mt-5">
-  <div class="card shadow-sm">
-    <div class="card-header bg-primary text-white">
-      <h4 class="mb-0">✏️ Cập nhật Học Sinh</h4>
+<body>
+    <div class="layout-wrapper">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-logo">📚 Quản Lý Trường</div>
+            <ul class="sidebar-menu">
+                <li><a href="../index.html" class="nav-link" data-page="dashboard">🏠 Dashboard</a></li>
+                <li><a href="index.html" class="nav-link" data-page="subjects">📖 Môn Học</a></li>
+                <li><a href="../teachers.html" class="nav-link" data-page="teachers">👨‍🏫 Giáo Viên</a></li>
+                <li><a href="../students.html" class="nav-link active" data-page="students">👨‍🎓 Học Sinh</a></li>
+                <li><a href="../scores.html" class="nav-link" data-page="scores">📊 Điểm Số</a></li>
+                <li><a href="../api/docs/" class="nav-link" target="_blank">📖 API Docs</a></li>
+            </ul>
+        </aside>
+
+        <div class="main-content">
+            <header class="header">
+                <h1 class="header-title">Sửa Thông Tin Học Sinh</h1>
+                <div class="header-right">
+                    <div class="user-menu">
+                        <span class="user-avatar" id="userAvatar">AD</span>
+                        <button class="logout-btn" id="logoutBtn">Đăng Xuất</button>
+                    </div>
+                </div>
+            </header>
+
+            <div id="alertContainer" style="position: fixed; top: 20px; right: 20px; z-index: 9999; max-width: 400px;">
+            </div>
+
+            <div class="content">
+                <!-- STEP 1: INPUT FORM -->
+                <div id="step-input" class="step-container active">
+                    <h2 style="margin-bottom: 20px;">Nhập Thông Tin Học Sinh</h2>
+                    <form id="editStudentForm">
+                        <div class="form-group">
+                            <label class="form-label" for="name">Tên Học Sinh <span style="color: red;">*</span></label>
+                            <input type="text" id="name" class="form-control" maxlength="100" required
+                                placeholder="Nhập tên học sinh...">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="avatar">Avatar <span style="color: red;">*</span></label>
+                            <img id="avatarPreview" class="preview-image" alt="Avatar Preview">
+                            <input type="file" id="avatar" class="form-control" accept="image/*" >
+                            
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="description">Mô tả chi tiết <span
+                                    style="color: red;">*</span></label>
+                            <textarea id="description" class="form-control" rows="5" maxlength="1000" required
+                                placeholder="Nhập mô tả chi tiết..."></textarea>
+                        </div>
+
+                        
+
+                        <div class="btn-group">
+                            <a href="index.html" class="btn btn-outline">Hủy</a>
+                            <button type="button" class="btn btn-primary" id="btnToConfirm">Xác nhận</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- STEP 2: CONFIRMATION -->
+                <div id="step-confirm" class="step-container">
+                    <h2 style="margin-bottom: 20px;">Xác Nhận Thông Tin</h2>
+
+                    <div class="confirm-row">
+                        <div class="confirm-label">Tên Học Sinh:</div>
+                        <div class="confirm-value" id="confirmName"></div>
+                    </div>
+
+                    <div class="confirm-row">
+                        <div class="confirm-label">Avatar:</div>
+                        <div class="confirm-value">
+                            <img id="confirmAvatar" class="preview-image show" alt="Confirm Avatar">
+                        </div>
+                    </div>
+
+                    <div class="confirm-row">
+                        <div class="confirm-label">Mô tả:</div>
+                        <div class="confirm-value" id="confirmDesc" style="white-space: pre-wrap;"></div>
+                    </div>
+
+                    
+
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-outline" id="btnBackToEdit">Sửa lại</button>
+                        <button type="button" class="btn btn-primary" id="btnRegister">Lưu</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+    <script src="../assets/js/utils/helpers.js"></script>
+    <script src="../assets/js/services/api.js"></script>
+    <script src="../assets/js/app.js"></script>
+    <script src="../assets/js/pages/students-edit.js"></script>
 
-    <div class="card-body">
-      <form id="editForm">
-        <div class="mb-3">
-          <label class="form-label">Tên học sinh</label>
-          <input type="text" id="name" class="form-control" required>
-        </div>
-
-        <div class="mb-3">
-          <label class="form-label">Ảnh đại diện</label> <br>
-          <img id="avatarPreview" class="img-thumbnail d-none mt-3"
-               style="max-width:180px">
-          <input type="file" id="avatar" class="form-control" accept="image/*">
-          
-        </div>
-
-        <div class="mb-3">
-          <label class="form-label">Mô tả</label>
-          <textarea id="description" class="form-control"></textarea>
-        </div>
-
-        <div class="d-flex justify-content-between">
-          <a href="index.html" class="btn btn-secondary">⬅️ Quay lại</a>
-          <button type="button" class="btn btn-success" onclick="saveToLocal()">Xác nhận</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-
-<script src="../assets/js/services/api.js"></script>
-<script src="../assets/js/pages/students-edit.js"></script>
 </body>
+
 </html>

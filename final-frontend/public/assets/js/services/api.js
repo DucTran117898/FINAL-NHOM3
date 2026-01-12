@@ -153,7 +153,7 @@ const studentService = {
 
     create: (data) => apiClient.post('/api/students', data),
 
-    update: (id, data) => apiClient.put(`/api/students/${id}`, data),
+    update: (id, data) => apiClient.post(`/api/students/${id}`, data),
 
     delete: (id) => apiClient.delete(`/api/students/${id}`),
 

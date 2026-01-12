@@ -17,6 +17,9 @@ if (!empty($_FILES)) {
 
 // Get the request method and path
 $method = $_SERVER['REQUEST_METHOD'];
+if ($method === 'POST' && isset($_POST['_method'])) {
+    $method = strtoupper($_POST['_method']);
+}
 $request_uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
 // Extract the action from the URL
@@ -163,82 +166,100 @@ try {
         }
     } elseif ($method === 'PUT') {
         if (is_numeric($action)) {
-            // Lấy dữ liệu JSON
-            $input = json_decode(file_get_contents('php://input'), true);
+            $studentId = (int)$action;
 
-            if (!$input || !isset($input['name']) || trim($input['name']) === '') {
+            // Parse multipart/form-data
+            $input = $_POST;
+
+            if (empty($input['name'])) {
                 http_response_code(400);
                 echo json_encode([
                     'success' => false,
                     'message' => 'Name is required'
-                ], JSON_UNESCAPED_UNICODE);
-                exit;
+                ]);
+                return;
             }
 
-            $avatarPath = ''; // mặc định rỗng
+            // ===== LẤY STUDENT CŨ =====
+            $oldStudent = $studentModel->getById($studentId);
+            if (!$oldStudent) {
+                http_response_code(404);
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Student not found'
+                ]);
+                return;
+            }
 
-            // === Xử lý avatar base64 nếu có ===
-            if (!empty($input['avatar']) && str_starts_with($input['avatar'], 'data:image/')) {
-                $dataUri = $input['avatar'];
-                $matches = [];
-                if (preg_match('/^data:image\/(\w+);base64,/', $dataUri, $matches)) {
-                    $extension = strtolower($matches[1]);
-                    $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-                    if (!in_array($extension, $allowed)) {
-                        http_response_code(400);
-                        echo json_encode(['success' => false, 'message' => 'Invalid image type'], JSON_UNESCAPED_UNICODE);
-                        exit;
-                    }
+            // ===== AVATAR =====
+            $avatarPath = $oldStudent['avatar'];
 
-                    $base64Str = substr($dataUri, strpos($dataUri, ',') + 1);
-                    $imageData = base64_decode($base64Str);
+            if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] === UPLOAD_ERR_OK) {
 
-                    if ($imageData === false) {
-                        http_response_code(400);
-                        echo json_encode(['success' => false, 'message' => 'Invalid base64 image'], JSON_UNESCAPED_UNICODE);
-                        exit;
-                    }
+                $uploadDir = __DIR__ . '/../../web/avatar/student/';
 
-                    // Tạo thư mục nếu chưa tồn tại
-                    $uploadDir = __DIR__ . '/../../web/avatar/';
-                    if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
-
-                    $fileName = uniqid('stu_') . '.' . $extension;
-                    $filePath = $uploadDir . $fileName;
-
-                    if (file_put_contents($filePath, $imageData) === false) {
-                        http_response_code(500);
-                        echo json_encode(['success' => false, 'message' => 'Failed to save file'], JSON_UNESCAPED_UNICODE);
-                        exit;
-                    }
-
-                    $avatarPath = $fileName; // chỉ lưu tên file
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0777, true);
                 }
-            } else if (isset($input['avatar']) && !empty($input['avatar'])) {
-                // Nếu gửi avatar là string (tên file cũ) -> giữ nguyên
-                $avatarPath = $input['avatar'];
+
+                $extension = pathinfo($_FILES['avatar']['name'], PATHINFO_EXTENSION);
+                $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+
+                if (!in_array(strtolower($extension), $allowed)) {
+                    http_response_code(400);
+                    echo json_encode([
+                        'success' => false,
+                        'message' => 'Invalid file type'
+                    ]);
+                    return;
+                }
+
+                $fileName = uniqid('stu_') . '.' . $extension;
+                $targetFile = $uploadDir . $fileName;
+
+                if (!move_uploaded_file($_FILES['avatar']['tmp_name'], $targetFile)) {
+                    http_response_code(500);
+                    echo json_encode([
+                        'success' => false,
+                        'message' => 'Failed to upload avatar'
+                    ]);
+                    return;
+                }
+
+                // Xóa avatar cũ (nếu có)
+                if (!empty($oldStudent['avatar'])) {
+                    $oldFile = __DIR__ . '/../../web/avatar/student/' . $oldStudent['avatar'];
+                    if (file_exists($oldFile)) {
+                        unlink($oldFile);
+                    }
+                }
+
+                // PATH public trả về cho frontend
+                $avatarPath = $fileName;
             }
 
-            // === Cập nhật dữ liệu ===
+            // ===== UPDATE DATA =====
             $data = [
-                'name' => $input['name'],
-                'avatar' => $avatarPath,
-                'description' => $input['description'] ?? ''
+                'name'        => $input['name'],
+                'description' => $input['description'] ?? '',
+                'avatar'      => $avatarPath
             ];
 
-            $result = $studentModel->update($action, $data);
+            $result = $studentModel->update($studentId, $data);
+
             if ($result) {
                 echo json_encode([
                     'success' => true,
                     'message' => 'Student updated successfully'
-                ], JSON_UNESCAPED_UNICODE);
+                ]);
             } else {
                 http_response_code(500);
                 echo json_encode([
                     'success' => false,
-                    'message' => 'Failed to update student'
-                ], JSON_UNESCAPED_UNICODE);
+                    'message' => 'Update failed'
+                ]);
             }
+
             exit;
         } else {
             http_response_code(400);
