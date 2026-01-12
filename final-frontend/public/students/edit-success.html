@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thành Công - Hệ Thống Quản Lý Trường Học</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        .success-container {
+            max-width: 600px;
+            margin: 100px auto;
+            text-align: center;
+            background: #fff;
+            padding: 50px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .success-icon {
+            font-size: 80px;
+            color: #28a745;
+            margin-bottom: 20px;
+        }
+
+        .success-title {
+            font-size: 28px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .success-desc {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="layout-wrapper">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-logo">📚 Quản Lý Trường</div>
+            <ul class="sidebar-menu">
+                <li><a href="../index.html" class="nav-link" data-page="dashboard">🏠 Dashboard</a></li>
+                <li><a href="index.html" class="nav-link active" data-page="subjects">📖 Môn Học</a></li>
+                <li><a href="../teachers.html" class="nav-link" data-page="teachers">👨‍🏫 Giáo Viên</a></li>
+                <li><a href="../students.html" class="nav-link" data-page="students">👨‍🎓 Học Sinh</a></li>
+                <li><a href="../scores.html" class="nav-link" data-page="scores">📊 Điểm Số</a></li>
+                <li><a href="../api/docs/" class="nav-link" target="_blank">📖 API Docs</a></li>
+            </ul>
+        </aside>
+
+        <div class="main-content">
+            <div class="success-container">
+                <div class="success-icon">✅</div>
+                <h1 class="success-title">Bạn đã sửa thành công thông tin học sinh</h1>
+                <p class="success-desc">Thông tin học sinh mới đã được cập nhật vào hệ thống.</p>
+                <a href="index.html" class="btn btn-primary">Trở về trang chủ</a>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
