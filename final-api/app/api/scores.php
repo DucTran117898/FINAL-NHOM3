@@ -68,73 +68,85 @@ try {
         }
     } elseif ($method === 'POST') {
         if ($action === null || $action === '') {
-            // POST /api/scores - create new
-            if (!$input || !isset($input['student_id']) || !isset($input['subject_id']) || !isset($input['teacher_id']) || !isset($input['score'])) {
+
+            if (
+                !$input ||
+                !isset($input['student_id']) ||
+                !isset($input['subject_id']) ||
+                !isset($input['teacher_ids']) ||
+                !is_array($input['teacher_ids']) ||
+                count($input['teacher_ids']) === 0 ||
+                !isset($input['score'])
+            ) {
                 http_response_code(400);
                 echo json_encode([
                     'success' => false,
-                    'message' => 'Student ID, Subject ID, Teacher ID, and Score are required'
+                    'message' => 'Student ID, Subject ID, Teacher IDs, and Score are required'
                 ]);
                 return;
             }
-            $data = [
-                'student_id' => $input['student_id'],
-                'subject_id' => $input['subject_id'],
-                'teacher_id' => $input['teacher_id'],
-                'score' => $input['score'],
-                'description' => $input['description'] ?? ''
-            ];
-            $result = $scoreModel->create($data);
-            if ($result) {
-                echo json_encode([
-                    'success' => true,
-                    'message' => 'Score created successfully'
-                ]);
-            } else {
-                http_response_code(500);
-                echo json_encode([
-                    'success' => false,
-                    'message' => 'Failed to create score'
-                ]);
+
+            foreach ($input['teacher_ids'] as $teacherId) {
+                $data = [
+                    'student_id' => $input['student_id'],
+                    'subject_id' => $input['subject_id'],
+                    'teacher_id' => $teacherId,
+                    'score' => $input['score'],
+                    'description' => $input['description'] ?? ''
+                ];
+                $scoreModel->create($data);
             }
-        } else {
-            http_response_code(400);
+
             echo json_encode([
-                'success' => false,
-                'message' => 'Invalid request'
+                'success' => true,
+                'message' => 'Score created for multiple teachers'
             ]);
         }
     } elseif ($method === 'PUT') {
         if (is_numeric($action)) {
-            // PUT /api/scores/123 - update
-            if (!$input || !isset($input['student_id']) || !isset($input['subject_id']) || !isset($input['teacher_id']) || !isset($input['score'])) {
+
+            if (
+                !$input ||
+                !isset($input['student_id']) ||
+                !isset($input['subject_id']) ||
+                !isset($input['teacher_ids']) ||
+                !is_array($input['teacher_ids']) ||
+                count($input['teacher_ids']) === 0 ||
+                !isset($input['score'])
+            ) {
                 http_response_code(400);
                 echo json_encode([
                     'success' => false,
-                    'message' => 'Student ID, Subject ID, Teacher ID, and Score are required'
+                    'message' => 'Student ID, Subject ID, Teacher IDs, and Score are required'
                 ]);
                 return;
             }
-            $data = [
-                'student_id' => $input['student_id'],
-                'subject_id' => $input['subject_id'],
-                'teacher_id' => $input['teacher_id'],
-                'score' => $input['score'],
-                'description' => $input['description'] ?? ''
-            ];
-            $result = $scoreModel->update($action, $data);
-            if ($result) {
-                echo json_encode([
-                    'success' => true,
-                    'message' => 'Score updated successfully'
-                ]);
-            } else {
+
+            $deleted = $scoreModel->deleteByGroup($action);
+            if (!$deleted) {
                 http_response_code(500);
                 echo json_encode([
                     'success' => false,
-                    'message' => 'Failed to update score'
+                    'message' => 'Failed to update score (delete old records failed)'
                 ]);
+                return;
             }
+
+            foreach ($input['teacher_ids'] as $teacherId) {
+                $data = [
+                    'student_id' => $input['student_id'],
+                    'subject_id' => $input['subject_id'],
+                    'teacher_id' => $teacherId,
+                    'score' => $input['score'],
+                    'description' => $input['description'] ?? ''
+                ];
+                $scoreModel->create($data);
+            }
+
+            echo json_encode([
+                'success' => true,
+                'message' => 'Score updated successfully'
+            ]);
         } else {
             http_response_code(400);
             echo json_encode([
@@ -142,7 +154,8 @@ try {
                 'message' => 'Invalid request'
             ]);
         }
-    } elseif ($method === 'DELETE') {
+    } 
+    elseif ($method === 'DELETE') {
         if (is_numeric($action)) {
             // DELETE /api/scores/123 - delete
             $result = $scoreModel->delete($action);

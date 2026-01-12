@@ -241,6 +241,70 @@ body {
     min-height: 100px;
 }
 
+.error-message {
+    display: block;
+    color: var(--danger);
+    font-size: 0.875rem;
+    margin-top: 5px;
+    min-height: 20px;
+}
+
+.form-group select.error,
+.form-group textarea.error,
+.form-group input.error {
+    border-color: var(--danger);
+}
+
+.confirm-info {
+    padding: 10px 0;
+}
+
+.info-group {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border);
+}
+
+.info-group:last-child {
+    border-bottom: none;
+}
+
+.info-group strong {
+    display: block;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+.info-group p {
+    color: var(--text-secondary);
+    margin: 0;
+    font-size: 1rem;
+}
+
+.success-info {
+    padding: 20px 0;
+    text-align: center;
+}
+
+.success-info h3 {
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+}
+
+.success-info p {
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    line-height: 1.6;
+}
+
+#successFooter {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    width: 100%;
+}
+
 /* Buttons */
 .btn {
     padding: 10px 20px;
@@ -400,6 +464,18 @@ tbody tr:hover {
     justify-content: flex-end;
     padding-top: 15px;
     border-top: 1px solid var(--border);
+}
+
+#confirmFooter {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+#formFooter {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
 }
 
 .modal-close {
@@ -673,4 +749,114 @@ tbody tr:hover {
         flex-direction: column;
         gap: 5px;
     }
+}
+
+/* =========================
+   QUICK SEARCH 
+========================= */
+.quicksearch-wrapper {
+    position: relative;
+    margin-bottom: 8px;
+}
+
+.quicksearch-input {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    margin-bottom: 6px;
+    font-size: 14px;
+}
+
+/* =========================
+   MULTI SELECT WRAPPER
+========================= */
+.multi-select {
+    position: relative;
+    width: 100%;
+}
+
+/* Ô hiển thị giống select thường */
+.multi-select-display {
+    border: 1px solid #ccc;
+    padding: 8px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    background: #fff;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+/* =========================
+   DROPDOWN
+========================= */
+.multi-select-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: #fff;
+    display: none;
+    z-index: 1000;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+/* Mở dropdown */
+.multi-select.open .multi-select-dropdown {
+    display: block;
+}
+
+/* =========================
+   ITEM (LABEL)
+========================= */
+.multi-select-dropdown label {
+    display: flex;
+    align-items: center;         
+    gap: 10px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1.4;
+    user-select: none;
+}
+
+/* Hover item */
+.multi-select-dropdown label:hover {
+    background-color: #f5f7fa;
+}
+
+/* =========================
+   CHECKBOX
+========================= */
+.multi-select-dropdown input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    margin: 0;                   
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+/* =========================
+   SCROLLBAR 
+========================= */
+.multi-select-dropdown::-webkit-scrollbar {
+    width: 6px;
+}
+
+.multi-select-dropdown::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 3px;
+}
+
+/* =========================
+   DISABLED / EMPTY
+========================= */
+.multi-select.disabled .multi-select-display {
+    background: #f5f5f5;
+    cursor: not-allowed;
+    color: #999;
 }
