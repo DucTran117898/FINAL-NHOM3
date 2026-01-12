@@ -70,39 +70,123 @@
         </div>
     </div>
 
-    <!-- Modal Add/Edit Score -->
-    <div class="modal" id="scoreModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title" id="modalTitle">Thêm Điểm</h2>
-                <span class="modal-close" id="modalClose">&times;</span>
-            </div>
-            <div class="modal-body">
+<!-- Modal Add/Edit Score -->
+<div class="modal" id="scoreModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title" id="modalTitle">Thêm Điểm</h2>
+            <span class="modal-close" id="modalClose">&times;</span>
+        </div>
+        <div class="modal-body">
+            <!-- Form Section -->
+            <div id="formSection">
                 <form id="scoreForm">
+
+                    <!-- Sinh viên -->
                     <div class="form-group">
                         <label for="studentId">Học Sinh:</label>
                         <select id="studentId" required>
                             <option value="">-- Chọn Học Sinh --</option>
                         </select>
+                        <span class="error-message" id="studentIdError"></span>
                     </div>
+
+                    <!-- Môn học -->
                     <div class="form-group">
                         <label for="subjectId">Môn Học:</label>
                         <select id="subjectId" required>
                             <option value="">-- Chọn Môn Học --</option>
                         </select>
+                        <span class="error-message" id="subjectIdError"></span>
                     </div>
+
+                    <div class="form-group">
+                        <label>Giáo Viên:</label>
+                        <div class="multi-select" id="teacherSelect">
+                            <div class="multi-select-display">-- Chọn Giáo Viên --</div>
+                            <div class="multi-select-dropdown">
+                                <!-- JS fill -->
+                            </div>
+                        </div>
+                        <span class="error-message" id="teacherIdsError"></span>
+                    </div>
+
+                    <!-- Điểm (select 0 ➝ 10) -->
                     <div class="form-group">
                         <label for="score">Điểm:</label>
-                        <input type="number" id="score" min="0" max="10" step="0.1" required>
+                        <select id="score">
+                            <option value="">-- Chọn điểm --</option>
+                        </select>
+                        <span class="error-message" id="scoreError"></span>
                     </div>
+
+                    <!-- Ghi chú -->
+                    <div class="form-group">
+                        <label for="comment">Ghi chú / Nhận xét:</label>
+                        <textarea id="comment" rows="3" placeholder="Nhập nhận xét chi tiết..."></textarea>
+                        <span class="error-message" id="commentError"></span>
+                    </div>
+
                 </form>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline" id="cancelBtn">Hủy</button>
-                <button type="button" class="btn btn-primary" id="saveBtn">Lưu</button>
+
+            <!-- Confirm Section -->
+            <div id="confirmSection" style="display: none;">
+                <div class="confirm-info">
+                    <h3 style="margin-bottom: 20px; color: var(--success);">✅ Xác nhận thông tin điểm số</h3>
+                    
+                    <div class="info-group">
+                        <strong>Học Sinh:</strong>
+                        <p id="confirmStudentName"></p>
+                    </div>
+
+                    <div class="info-group">
+                        <strong>Môn Học:</strong>
+                        <p id="confirmSubjectName"></p>
+                    </div>
+
+                    <div class="info-group">
+                        <strong>Giáo Viên:</strong>
+                        <p id="confirmTeacherNames"></p>
+                    </div>
+
+                    <div class="info-group">
+                        <strong>Điểm:</strong>
+                        <p id="confirmScore"></p>
+                    </div>
+
+                    <div class="info-group">
+                        <strong>Ghi chú / Nhận xét:</strong>
+                        <p id="confirmComment"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Success Section -->
+            <div id="successSection" style="display: none;">
+                <div class="success-info">
+                    <h3 style="margin-bottom: 20px; color: var(--success); text-align: center;">✅ Thành công</h3>
+                    <p id="successMessage" style="text-align: center; font-size: 1.1rem; margin-bottom: 30px;"></p>
+                </div>
             </div>
         </div>
+
+        <div class="modal-footer">
+            <div id="formFooter">
+                <button type="button" class="btn btn-primary" id="confirmBtn">Xác nhận</button>
+            </div>
+            <div id="confirmFooter" style="display: none;">
+                <button type="button" class="btn btn-outline" id="backToFormBtn">⬅️ Sửa lại</button>
+                <button type="button" class="btn btn-primary" id="saveScoreBtn">💾 Nhập điểm</button>
+            </div>
+            <div id="successFooter" style="display: none;">
+                <button type="button" class="btn btn-primary" id="backToHomeBtn">Trở về trang chủ</button>
+            </div>
+        </div>
+
     </div>
+</div>
+
 
     <script src="assets/js/services/api.js"></script>
     <script src="assets/js/utils/helpers.js"></script>
