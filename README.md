@@ -4,7 +4,7 @@
 Đây là một dự án hoàn chỉnh để quản lý trường học với kiến trúc **API-first**. Hệ thống bao gồm:
 
 - **Backend (API)**: PHP thuần, RESTful API với JWT authentication
-- **Frontend**: Vanilla HTML/CSS/JavaScript
+- **Frontend**: Vue 3 (Vite SPA)
 - **Database**: MySQL với role-based user system
 - **Documentation**: Swagger UI
 
@@ -57,8 +57,9 @@
 - Added middleware protection for API endpoints
 
 ### Frontend
-- Updated app.js to manage token storage (LocalStorage) and attach them to outgoing requests
-- Enhanced login form with validation and error handling
+- Refactored frontend sang Vue 3 + Vue Router (build bằng Vite)
+- Centralized API client trong `final-frontend/src/services/api.js` với JWT token handling
+- Login, dashboard và các trang quản lý được xây dựng bằng Vue components với validation & error handling
 
 ### Schema
 - Updated database_schema.sql to support user roles and credential fields
@@ -115,26 +116,20 @@ Cuoiky/
 │   │       ├── students/models/student.php
 │   │       └── scores/models/score.php
 │
-└── final-frontend/                     # FRONTEND (Vanilla JS)
-    ├── public/
-    │   ├── index.html                  # Dashboard
-    │   ├── login.html                  # Login page
-    │   ├── subjects.html               # Subjects management
-    │   ├── teachers.html               # Teachers management
-    │   ├── students.html               # Students management
-    │   ├── scores.html                 # Scores management
-    │   ├── api/docs/                   # API Documentation
-    │   │   ├── index.html              # Swagger UI
-    │   │   └── swagger.json            # OpenAPI spec
-    │   └── assets/
-    │       ├── css/style.css           # Global styles
-    │       ├── js/
-    │       │   ├── app.js              # Main app script
-    │       │   ├── services/api.js     # API client
-    │       │   ├── pages/              # Page scripts
-    │       │   └── utils/helpers.js    # Utilities
-    │       ├── images/                 # Static images
-    │       └── icons/                  # Icons
+└── final-frontend/                     # FRONTEND (Vue 3 + Vite)
+  ├── index.html                      # Vite entry (dashboard)
+  ├── login.html                      # Vite entry (login)
+  ├── src/
+  │   ├── main.js                     # Vue app entry + router
+  │   ├── App.vue                     # Root component
+  │   ├── components/                 # Vue pages/components (Dashboard, Students, Teachers, ...)
+  │   ├── services/
+  │   │   └── api.js                  # API client (JWT, REST calls)
+  │   └── assets/
+  │       └── css/style.css           # Global styles
+  ├── public/                         # (Legacy) static HTML/CSS/JS frontend, có thể xoá sau khi không dùng nữa
+  ├── package.json                    # Vite + Vue dependencies & scripts
+  └── vite.config.js                  # Vite config (multi-entry: index.html, login.html)
 ```
 
 ## 🛠️ Cài Đặt & Chạy
@@ -179,8 +174,14 @@ cd final-api
 php -S 127.0.0.1:8000 index.php
 ```
 
-### 5. Chạy Frontend
-Mở `final-frontend/public/index.html` trong browser hoặc dùng Live Server extension.
+### 5. Chạy Frontend (Vue + Vite)
+```bash
+cd final-frontend
+npm install
+npm run dev
+```
+
+Frontend sẽ chạy tại: **`http://localhost:3000`** (theo cấu hình Vite).
 
 ## 📖 API Documentation
 
@@ -316,33 +317,20 @@ For questions or issues, please create an issue in the repository.
 │   │       └── avatar/
 │   └── .gitignore              # Git ignore cho backend
 │
-└── final-frontend/              # Frontend (Pure HTML/CSS/JavaScript)
-    ├── README_VI.md            # Tài liệu Frontend
-    ├── public/
-    │   ├── index.html          # Dashboard chính (home page)
-    │   ├── login.html          # Trang đăng nhập
-    │   ├── subjects.html       # Quản lý môn học
-    │   ├── teachers.html       # Quản lý giáo viên
-    │   ├── students.html       # Quản lý học sinh
-    │   ├── classrooms.html     # Quản lý lớp học
-    │   ├── scores.html         # Quản lý điểm số
-    │   └── assets/
-    │       ├── css/
-    │       │   └── style.css   # Styling chính
-    │       ├── js/
-    │       │   ├── app.js      # Quản lý routing & session
-    │       │   ├── services/
-    │       │   │   └── api.js  # Service giao tiếp với backend API
-    │       │   ├── utils/
-    │       │   │   └── helpers.js
-    │       │   └── pages/      # Page-specific scripts
-    │       │       ├── subjects.js
-    │       │       ├── teachers.js
-    │       │       ├── students.js
-    │       │       ├── classrooms.js
-    │       │       └── scores.js
-    │       ├── images/
-    │       └── icons/
+└── final-frontend/              # Frontend (Vue 3 + Vite SPA)
+  ├── index.html               # Vite entry (dashboard)
+  ├── login.html               # Vite entry (login)
+  ├── src/
+  │   ├── main.js              # Khởi tạo Vue app + router
+  │   ├── App.vue              # Root component
+  │   ├── components/          # Các màn hình: Login, Dashboard, Students, Teachers, Subjects, Scores, ...
+  │   ├── services/
+  │   │   └── api.js           # HTTP client giao tiếp backend (JWT)
+  │   └── assets/
+  │       └── css/style.css    # Styling chính (dùng lại CSS cũ)
+  ├── public/                  # Legacy static frontend (có thể xoá nếu không dùng)
+  ├── package.json             # Scripts: dev/build/preview với Vite
+  └── vite.config.js           # Cấu hình Vite (multi-entry, alias @ -> src)
 ```
 
 ## Hướng Dẫn Chạy Dự Án
@@ -350,8 +338,8 @@ For questions or issues, please create an issue in the repository.
 ### 1. Chuẩn Bị
 - Cài **PHP 7.4+**
 - Cài **MySQL 5.7+**
+- Cài **Node.js 18+** (để chạy Vite)
 - Cài **Visual Studio Code**
-- Cài extension **Live Server** trong VS Code (Publisher: Ritwick Dey)
 
 ### 2. Cài Đặt Backend (API)
 
@@ -368,45 +356,31 @@ cd final-api
 # - Import: database_schema.sql vào MySQL database
 # - Hoặc chạy: mysql -u root -p school_management < database_schema.sql
 
+```bash
 # 4. Chạy PHP server
 cd final-api
-php -S localhost:8000
+php -S 127.0.0.1:8000 index.php
 ```
 
-Backend sẽ chạy tại: **`http://localhost:8000`**
+Backend sẽ chạy tại: **`http://127.0.0.1:8000`**
 
-### 3. Cài Đặt Frontend (với Live Server Extension)
-
-**Cách 1: Sử dụng Live Server Extension (Khuyến nghị)**
-
-```
-1. Mở VS Code
-2. Mở folder: final-frontend/public
-3. Chuột phải vào file index.html
-4. Chọn "Open with Live Server"
-5. Browser sẽ tự động mở tại: http://127.0.0.1:5500
-```
-
-**Cách 2: Sử dụng terminal (nếu muốn)**
+### 3. Cài Đặt Frontend (Vue 3 + Vite)
 
 ```bash
-# Cài đặt live-server globally (nếu chưa có)
-npm install -g live-server
-
-# Di chuyển vào thư mục frontend
-cd final-frontend/public
-
-# Chạy live-server
-live-server
+cd final-frontend
+npm install
+npm run dev
 ```
 
+Frontend development server sẽ chạy tại: **`http://localhost:3000`**.
+
 ### 4. Kiểm Tra Kết Nối
-- ✅ Backend API: **`http://localhost:8000`**
-- ✅ Frontend: **`http://127.0.0.1:5500`**
+- ✅ Backend API: **`http://127.0.0.1:8000`**
+- ✅ Frontend (Vite dev): **`http://localhost:3000`**
 - ✅ Đảm bảo cả 2 đều chạy cùng lúc
 
 ### 5. Đăng Nhập Lần Đầu
-- Truy cập: `http://127.0.0.1:5500/login.html`
+- Truy cập: `http://localhost:3000/login.html`
 - **Sample Accounts:**
   - **Admin**: `admin` / `123456` (full access)
   - **Teacher**: `teacher1` / `123456` (scores & students)
@@ -419,14 +393,13 @@ live-server
 - **PHP 7.4+** - Server-side scripting
 - **MySQL 5.7+** - Database
 - **RESTful API** - API Architecture
-- **Session-based Authentication** - Xác thực người dùng
+- **JWT-based Authentication** - Xác thực người dùng bằng JWT token
 
 ### Frontend
-- **HTML5** - Markup
-- **CSS3** - Styling (Pure CSS, không dùng framework)
-- **JavaScript (ES6+)** - Vanilla JS (không dùng React, Vue, Angular)
-- **Fetch API** - Giao tiếp với backend
-- **Live Server** - Local development server
+- **Vue 3** - UI framework (Single Page Application)
+- **Vue Router** - Client-side routing
+- **Vite** - Dev server & bundler
+- **CSS3** - Styling (tái sử dụng style cũ)
 
 ## Các Phần Đã Xây Dựng
 
@@ -440,11 +413,13 @@ live-server
   - POST `/api/auth/reset-approve` - Admin duyệt reset
 - **User Model** - Hỗ trợ role-based authentication (admin/teacher/student)
 
-### Frontend Pages
-- **login.html** - Trang đăng nhập với validation & error handling
-- **index.html** - Dashboard với role display & protected navigation
-- **assets/js/app.js** - JWT session management & role-based UI
-- **assets/js/services/api.js** - API client với token authentication
+### Frontend Pages (Vue)
+- **Login.vue** (route `/login.html`) - Trang đăng nhập với validation & error handling
+- **Dashboard.vue** (routes `/` và `/index.html`) - Dashboard với role display & protected navigation
+- **StudentsList.vue / TeachersList.vue / SubjectsList.vue / ScoresList.vue** - Các trang quản lý danh sách
+- **StudentEdit.vue / TeacherEdit.vue / SubjectEdit.vue / ScoreEdit.vue** - Form thêm/sửa dữ liệu
+- **ResetPasswordRequest.vue / AdminResetRequests.vue** - Luồng reset password
+- **src/services/api.js** - API client với JWT token authentication
 
 ### Database
 - **database_schema.sql** - Schema với users table, roles & sample data

@@ -103,8 +103,8 @@ try {
             // Handle Avatar Upload
             $avatarPath = '';
             if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] === UPLOAD_ERR_OK) {
-                // Path: ./final-api/web/avatar
-                $uploadDir = __DIR__ . '/../../web/avatar/';
+                // Path: ./final-api/web/avatar/student
+                $uploadDir = __DIR__ . '/../../web/avatar/student/';
 
                 // Create directory if not exists
                 if (!is_dir($uploadDir)) {
@@ -129,11 +129,11 @@ try {
                     exit;
                 }
 
-                // Lưu đường dẫn tương đối vào database: avatar/filename.jpg
-                $avatarPath = 'avatar/' . $avatarFileName;
+                // Store only the filename in database (same format as update)
+                $avatarPath = $avatarFileName;
             } elseif (isset($input['avatar']) && !empty($input['avatar'])) {
-                // If avatar is provided as string (from JSON), use it directly
-                $avatarPath = $input['avatar'];
+                // If avatar is provided as string (from JSON), normalize legacy paths like "avatar/filename.jpg"
+                $avatarPath = preg_replace('#^avatar/+#', '', $input['avatar']);
             }
 
             $data = [

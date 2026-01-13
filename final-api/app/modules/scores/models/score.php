@@ -18,19 +18,21 @@ class Score {
         $params = [];
 
         if (!empty($student_name)) {
-            $sql .= " AND st.name ILIKE ?";
+            $sql .= " AND LOWER(st.name) LIKE LOWER(?)";
             $params[] = '%' . $student_name . '%';
         }
 
         if (!empty($subject_name)) {
-            $sql .= " AND sub.name ILIKE ?";
+            $sql .= " AND LOWER(sub.name) LIKE LOWER(?)";
             $params[] = '%' . $subject_name . '%';
         }
 
         if (!empty($teacher_name)) {
-            $sql .= " AND t.name ILIKE ?";
+            $sql .= " AND LOWER(t.name) LIKE LOWER(?)";
             $params[] = '%' . $teacher_name . '%';
         }
+
+        $sql .= " ORDER BY s.id DESC";
 
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
@@ -40,20 +42,21 @@ class Score {
     public function getAll() {
         $sql = "
             SELECT 
-                MIN(s.id) AS id,
+                s.id,
                 s.student_id,
                 s.subject_id,
+                s.teacher_id,
                 s.score,
-                GROUP_CONCAT(t.name SEPARATOR ', ') AS teacher_names,
+                s.description,
+                t.name AS teacher_name,
                 st.name AS student_name,
                 sub.name AS subject_name,
-                MIN(s.created) AS created_at
+                s.created AS created_at
             FROM scores s
             JOIN students st ON s.student_id = st.id
             JOIN subjects sub ON s.subject_id = sub.id
             JOIN teachers t ON s.teacher_id = t.id
-            GROUP BY s.student_id, s.subject_id, s.score, st.name, sub.name
-            ORDER BY created_at DESC
+            ORDER BY s.id DESC
         ";
 
         $stmt = $this->db->query($sql);

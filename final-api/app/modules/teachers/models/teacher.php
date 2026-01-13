@@ -18,10 +18,16 @@ class Teacher {
         }
 
         if (!empty($keyword)) {
-            $sql .= " AND (name ILIKE ? OR description ILIKE ?)";
-            $params[] = '%' . $keyword . '%';
-            $params[] = '%' . $keyword . '%';
+            // Tìm gần đúng theo name, description hoặc degree
+            $sql .= " AND (name LIKE ? OR description LIKE ? OR degree LIKE ?)";
+            $like = '%' . $keyword . '%';
+            $params[] = $like;
+            $params[] = $like;
+            $params[] = $like;
         }
+
+        // Sắp xếp giảm dần theo id (mặc định hiển thị mới nhất trước)
+        $sql .= " ORDER BY id DESC";
 
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
@@ -29,7 +35,8 @@ class Teacher {
     }
 
     public function getAll() {
-        $stmt = $this->db->query("SELECT * FROM teachers ORDER BY id");
+        // Hiển thị toàn bộ, sắp xếp giảm dần theo id
+        $stmt = $this->db->query("SELECT * FROM teachers ORDER BY id DESC");
         return $stmt->fetchAll();
     }
 

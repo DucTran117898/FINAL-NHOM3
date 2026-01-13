@@ -9,74 +9,82 @@
 </head>
 
 <body>
-    <div class="layout-wrapper">
-        <!-- Sidebar Navigation -->
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar-logo">📚 Quản Lý Trường</div>
-            <ul class="sidebar-menu" id="sidebarMenu">
-                <li><a href="index.html" class="nav-link active" data-page="dashboard">🏠 Dashboard</a></li>
-                <li><a href="subjects/index.html" class="nav-link" data-page="subjects">📖 Môn Học</a></li>
-                <li><a href="teachers.html" class="nav-link" data-page="teachers">👨‍🏫 Giáo Viên</a></li>
-                <li><a href="students/index.html" class="nav-link" data-page="students">👨‍🎓 Học Sinh</a></li>
-                <li><a href="scores.html" class="nav-link" data-page="scores">📊 Điểm Số</a></li>
-                <li><a href="api/docs/" class="nav-link" target="_blank">📖 API Docs</a></li>
-                <li>
-                    <a href="admin-reset.html" class="nav-link"
-                        style="display: flex; align-items: center; justify-content: space-between;">
-                        <span>🔐 Duyệt Reset</span>
-                        <span id="reset-badge" style="
-            display: none;
-            background-color: #ff4757;
-            color: white;
-            border-radius: 12px;
-            padding: 2px 8px;
-            font-size: 11px;
-            font-weight: bold;
-        ">0</span>
-                    </a>
-                </li>
-            </ul>
-        </aside>
-
-        <!-- Main Content Area -->
-        <div class="main-content">
-            <!-- Header -->
-            <header class="header">
-                <div class="header-left">
-                    <h1 class="header-title" id="headerTitle">Dashboard</h1>
-                    <!-- Login Info Section -->
-                    <div class="login-info">
-                        <div class="login-info-item">
-                            <span class="login-info-label">Tên login:</span>
-                            <span class="login-info-value" id="loginIdDisplay">-</span>
-                        </div>
-                        <div class="login-info-item">
-                            <span class="login-info-label">Vai trò:</span>
-                            <span class="login-info-value" id="roleDisplay">-</span>
-                        </div>
-                        <div class="login-info-item">
-                            <span class="login-info-label">Thời gian login:</span>
-                            <span class="login-info-value" id="loginTimeDisplay">-</span>
-                        </div>
-                    </div>
+    <div class="dashboard-full-page">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="login-info-vertical">
+                <div class="login-info-item">
+                    <span class="login-info-label">Tên login:</span>
+                    <span class="login-info-value" id="loginIdDisplay">-</span>
                 </div>
-                <div class="header-right">
-                    <div class="user-menu">
-                        <span class="user-avatar" id="userAvatar">AD</span>
-                        <button class="logout-btn" id="logoutBtn">Đăng Xuất</button>
-                    </div>
+                <div class="login-info-item">
+                    <span class="login-info-label">Thời gian login:</span>
+                    <span class="login-info-value" id="loginTimeDisplay">-</span>
                 </div>
-            </header>
-
-            <!-- Alert Container -->
-            <div id="alertContainer" style="position: fixed; top: 20px; right: 20px; z-index: 9999; max-width: 400px;">
+                <div class="login-info-item">
+                    <span class="login-info-label">Vai trò:</span>
+                    <span class="login-info-value" id="roleDisplay">-</span>
+                </div>
             </div>
-
-            <!-- Content Area -->
-            <div class="content" id="content">
-                <!-- Content will be dynamically loaded here -->
+            <div class="header-right">
+                <div class="user-menu">
+                    <span class="user-avatar" id="userAvatar">AD</span>
+                    <button class="logout-btn" id="logoutBtn">Đăng Xuất</button>
+                </div>
             </div>
+        </header>
+
+        <!-- Alert Container -->
+        <div id="alertContainer" style="position: fixed; top: 20px; right: 20px; z-index: 9999; max-width: 400px;">
         </div>
+
+        <!-- Dashboard Grid - Full Width -->
+        <div class="dashboard-grid-full" id="dashboardGrid">
+                    <!-- Phòng học Column -->
+                    <div class="dashboard-column">
+                        <h3 class="dashboard-column-title">Phòng học</h3>
+                        <div class="dashboard-column-buttons">
+                            <button class="dashboard-btn dashboard-btn-search" onclick="window.location.href='#'">Tìm kiếm</button>
+                            <button class="dashboard-btn dashboard-btn-add" onclick="window.location.href='#'">Thêm mới</button>
+                        </div>
+                    </div>
+
+                    <!-- Giáo viên Column -->
+                    <div class="dashboard-column">
+                        <h3 class="dashboard-column-title">Giáo viên</h3>
+                        <div class="dashboard-column-buttons">
+                            <button class="dashboard-btn dashboard-btn-search" onclick="window.location.href='teachers.html'">Tìm kiếm</button>
+                            <button class="dashboard-btn dashboard-btn-add" onclick="window.location.href='teacher_register.html'">Thêm mới</button>
+                        </div>
+                    </div>
+
+                    <!-- Môn học Column -->
+                    <div class="dashboard-column">
+                        <h3 class="dashboard-column-title">Môn học</h3>
+                        <div class="dashboard-column-buttons">
+                            <button class="dashboard-btn dashboard-btn-search" onclick="window.location.href='subjects/index.html'">Tìm kiếm</button>
+                            <button class="dashboard-btn dashboard-btn-add" onclick="window.location.href='subjects/add.html'">Thêm mới</button>
+                        </div>
+                    </div>
+
+                    <!-- Sinh viên Column -->
+                    <div class="dashboard-column">
+                        <h3 class="dashboard-column-title">Sinh viên</h3>
+                        <div class="dashboard-column-buttons">
+                            <button class="dashboard-btn dashboard-btn-search" onclick="window.location.href='students/index.html'">Tìm kiếm</button>
+                            <button class="dashboard-btn dashboard-btn-add" onclick="window.location.href='students/student-edit.html'">Thêm mới</button>
+                        </div>
+                    </div>
+
+                    <!-- Điểm Column -->
+                    <div class="dashboard-column">
+                        <h3 class="dashboard-column-title">Điểm</h3>
+                        <div class="dashboard-column-buttons">
+                            <button class="dashboard-btn dashboard-btn-search" onclick="window.location.href='scores.html'">Tìm kiếm</button>
+                            <button class="dashboard-btn dashboard-btn-add" onclick="window.location.href='scores.html'">Thêm mới</button>
+                        </div>
+                    </div>
+                </div>
     </div>
 
     <!-- Scripts -->

@@ -102,8 +102,17 @@ function updateUserDisplay(user) {
         }
 
         const loginTimeDisplay = document.getElementById('loginTimeDisplay');
-        if (loginTimeDisplay && user.login_time) {
-            loginTimeDisplay.textContent = user.login_time;
+        if (loginTimeDisplay) {
+            if (user.login_time) {
+                // Format login time as Y-m-d H:i
+                const loginTime = formatLoginTime(user.login_time);
+                loginTimeDisplay.textContent = loginTime;
+            } else {
+                // If no login_time, use current time
+                const now = new Date();
+                const formattedTime = formatDateToYmdHi(now);
+                loginTimeDisplay.textContent = formattedTime;
+            }
         }
     }
 }
@@ -125,6 +134,36 @@ async function handleLogout() {
         localStorage.removeItem('user');
         window.location.href = getLoginUrl();
     }
+}
+
+/**
+ * Format login time to Y-m-d H:i format
+ */
+function formatLoginTime(timeString) {
+    if (!timeString) return '-';
+    
+    try {
+        const date = new Date(timeString);
+        if (isNaN(date.getTime())) {
+            // If it's already in Y-m-d H:i format, return as is
+            return timeString;
+        }
+        return formatDateToYmdHi(date);
+    } catch (error) {
+        return timeString;
+    }
+}
+
+/**
+ * Format date to Y-m-d H:i format
+ */
+function formatDateToYmdHi(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day} ${hours}:${minutes}`;
 }
 
 /**
