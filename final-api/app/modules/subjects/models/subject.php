@@ -18,7 +18,8 @@ class Subject {
         }
 
         if (!empty($keyword)) {
-            $sql .= " AND (name ILIKE ? OR description ILIKE ?)";
+            // Use LIKE for broader DB compatibility (MySQL/PostgreSQL)
+            $sql .= " AND (name LIKE ? OR description LIKE ?)";
             $params[] = '%' . $keyword . '%';
             $params[] = '%' . $keyword . '%';
         }
@@ -29,7 +30,8 @@ class Subject {
     }
 
     public function getAll() {
-        $stmt = $this->db->query("SELECT * FROM subjects ORDER BY id");
+        // Requirement: order by ID in descending order for initial display
+        $stmt = $this->db->query("SELECT * FROM subjects ORDER BY id DESC");
         return $stmt->fetchAll();
     }
 

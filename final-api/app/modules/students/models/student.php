@@ -25,8 +25,27 @@ class Student {
     }
 
     public function delete($id) {
-        $stmt = $this->db->prepare("DELETE FROM students WHERE id = ?");
-        return $stmt->execute([$id]);
+        try {
+            // Start transaction to safely delete related data
+            $this->db->beginTransaction();
+
+            // Delete related scores first to satisfy foreign key constraints
+            $stmtScore = $this->db->prepare("DELETE FROM scores WHERE student_id = ?");
+            $stmtScore->execute([$id]);
+
+            // Then delete the student record itself
+            $stmt = $this->db->prepare("DELETE FROM students WHERE id = ?");
+            $stmt->execute([$id]);
+
+            $this->db->commit();
+            return $stmt->rowCount() > 0;
+        } catch (Exception $e) {
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+            error_log('Failed to delete student: ' . $e->getMessage());
+            return false;
+        }
     }
 
     public function getAll($limit = 10, $offset = 0) {
