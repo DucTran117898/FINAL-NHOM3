@@ -96,6 +96,86 @@ try {
                     'message' => 'Failed to create teacher'
                 ]);
             }
+        } elseif (is_numeric($action) && isset($_POST['_method']) && $_POST['_method'] === 'PUT') {
+            // POST /api/teachers/123 with _method=PUT - update with FormData (file upload)
+            $errors = [];
+            
+            $name = $_POST['name'] ?? '';
+            $specialized = $_POST['specialized'] ?? '';
+            $degree = $_POST['degree'] ?? '';
+            $description = $_POST['description'] ?? '';
+            
+            if (empty($name)) {
+                $errors['name'] = 'Hãy nhập tên giáo viên.';
+            } elseif (strlen($name) > 100) {
+                $errors['name'] = 'Không nhập quá 100 ký tự.';
+            }
+            
+            if (empty($specialized)) {
+                $errors['specialized'] = 'Hãy chọn bộ môn.';
+            }
+            
+            if (empty($degree)) {
+                $errors['degree'] = 'Hãy chọn bằng cấp.';
+            }
+            
+            if (empty($description)) {
+                $errors['description'] = 'Hãy nhập mô tả chi tiết';
+            } elseif (strlen($description) > 1000) {
+                $errors['description'] = 'Không nhập quá 1000 ký tự';
+            }
+            
+            // Handle avatar
+            $avatar_filename = $_POST['existing_avatar'] ?? '';
+            
+            if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] === UPLOAD_ERR_OK) {
+                $file_info = pathinfo($_FILES['avatar']['name']);
+                $extension = strtolower($file_info['extension']);
+                $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif'];
+                
+                if (!in_array($extension, $allowed_extensions)) {
+                    $errors['avatar'] = 'Định dạng file không hợp lệ (JPG, JPEG, PNG, GIF).';
+                } else {
+                    $avatar_filename = uniqid('teacher_') . '.' . $extension;
+                    $upload_dir = __DIR__ . '/../../web/avatar/teacher/';
+                    
+                    if (!is_dir($upload_dir)) {
+                        mkdir($upload_dir, 0777, true);
+                    }
+                    
+                    if (!move_uploaded_file($_FILES['avatar']['tmp_name'], $upload_dir . $avatar_filename)) {
+                        $errors['avatar'] = 'Không thể lưu file avatar.';
+                    }
+                }
+            }
+            
+            if (!empty($errors)) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'errors' => $errors]);
+                return;
+            }
+            
+            $data = [
+                'name' => $name,
+                'avatar' => $avatar_filename,
+                'description' => $description,
+                'specialized' => $specialized,
+                'degree' => $degree
+            ];
+            
+            $result = $teacherModel->update($action, $data);
+            if ($result) {
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'Teacher updated successfully'
+                ]);
+            } else {
+                http_response_code(500);
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Failed to update teacher'
+                ]);
+            }
         } else {
             http_response_code(400);
             echo json_encode([
