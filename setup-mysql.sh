@@ -1,0 +1,56 @@
+#!/bin/bash
+
+echo "========================================="
+echo "MySQL Setup Script for Codespace"
+echo "========================================="
+echo ""
+
+# Update package list
+echo "📦 Updating package list..."
+sudo apt-get update -qq
+
+# Install MySQL client and server
+echo "📥 Installing MySQL client and server..."
+sudo apt-get install -y mysql-client mysql-server > /dev/null 2>&1
+
+# Start MySQL service
+echo "🚀 Starting MySQL service..."
+sudo service mysql start
+
+# Wait for MySQL to be ready
+echo "⏳ Waiting for MySQL to be ready..."
+sleep 3
+
+# Create database
+echo "🗄️  Creating database..."
+sudo mysql -e "CREATE DATABASE IF NOT EXISTS school_management CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+
+# Import schema
+echo "📋 Importing database schema..."
+sudo mysql school_management < /workspaces/FINAL-NHOM3/final-api/database_schema.sql
+
+# Configure MySQL user for localhost access without password
+echo "👤 Configuring MySQL user..."
+sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '';"
+sudo mysql -e "GRANT ALL PRIVILEGES ON school_management.* TO 'root'@'localhost';"
+sudo mysql -e "FLUSH PRIVILEGES;"
+
+# Verify installation
+echo ""
+echo "✅ Verifying installation..."
+sudo mysql -e "USE school_management; SHOW TABLES;"
+
+echo ""
+echo "========================================="
+echo "✨ MySQL setup completed successfully!"
+echo "========================================="
+echo ""
+echo "📌 Database Information:"
+echo "   Host: localhost"
+echo "   Database: school_management"
+echo "   User: root"
+echo "   Password: (empty)"
+echo ""
+echo "💡 To connect to MySQL:"
+echo "   mysql -u root school_management"
+echo ""
