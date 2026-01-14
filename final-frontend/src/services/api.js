@@ -3,7 +3,14 @@
  * Handles all API communication with the backend
  */
 
-const API_BASE_URL = 'http://localhost:8000'
+const getAPIBaseURL = () => {
+  if (window.location.hostname.includes('github.dev') || window.location.hostname.includes('app.github.dev')) {
+    return `${window.location.protocol}//${window.location.hostname.replace('-3000', '-8000')}`
+  }
+  return 'http://localhost:8000'
+}
+
+const API_BASE_URL = getAPIBaseURL()
 
 class APIClient {
   constructor(baseURL = API_BASE_URL) {

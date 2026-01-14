@@ -91,7 +91,10 @@ class TeacherEdit {
                 
                 // Show existing avatar if available
                 if (teacher.avatar) {
-                    const avatarUrl = `http://localhost:8000/web/avatar/teacher/${teacher.avatar}`;
+                    const baseURL = getAPIBaseURL();
+                    console.log('Base URL:', baseURL);
+                    const avatarUrl = `${baseURL}/web/avatar/teacher/${teacher.avatar}`;
+                    console.log('Avatar URL:', avatarUrl);
                     this.avatarPreview.src = avatarUrl;
                     DOM.show(this.avatarPreviewContainer);
                 }
@@ -237,7 +240,7 @@ class TeacherEdit {
                 formData.append('existing_avatar', this.currentAvatarFilename);
             }
 
-            const response = await fetch(`http://localhost:8000/api/teachers/${this.teacherId}`, {
+            const response = await fetch(`${getAPIBaseURL()}/api/teachers/${this.teacherId}`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${apiClient.getToken()}`

@@ -197,7 +197,13 @@
 <script>
 import { teacherService, apiClient, authService } from '../services/api.js'
 import { StorageUtils, AlertUtils } from '../utils/helpers.js'
-
+// Import getAPIBaseURL function
+const getAPIBaseURL = () => {
+  if (window.location.hostname.includes('github.dev') || window.location.hostname.includes('app.github.dev')) {
+    return `${window.location.protocol}//${window.location.hostname.replace('-3000', '-8000')}`
+  }
+  return 'http://localhost:8000'
+}
 export default {
   name: 'TeacherEdit',
   data() {
@@ -314,7 +320,7 @@ export default {
         this.form.existingAvatar = data.avatar || ''
 
         if (data.avatar) {
-          this.previewUrl = `http://localhost:8000/web/avatar/teacher/${data.avatar}`
+          this.previewUrl = `${getAPIBaseURL()}/web/avatar/teacher/${data.avatar}`
         }
       } catch (error) {
         console.error(error)

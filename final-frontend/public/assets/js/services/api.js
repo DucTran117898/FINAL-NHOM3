@@ -3,7 +3,18 @@
  * Handles all API communication with the backend
  */
 
-const API_BASE_URL = 'http://localhost:8000';
+// Auto-detect API URL based on environment
+const getAPIBaseURL = () => {
+  // Check if running in GitHub Codespaces
+  if (window.location.hostname.includes('github.dev') || window.location.hostname.includes('app.github.dev')) {
+    // Use the same hostname but with port 8000
+    return `${window.location.protocol}//${window.location.hostname.replace('-3000', '-8000')}`
+  }
+  // Default to localhost for local development
+  return 'http://localhost:8000';
+}
+
+const API_BASE_URL = getAPIBaseURL();
 
 class APIClient {
     constructor(baseURL = API_BASE_URL) {
